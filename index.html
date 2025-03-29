@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ice Cream Flavor Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1>Ice Cream Flavor Generator</h1>
+
+    <!-- Tabs for Normal and Weird Flavours -->
+    <div class="tabs">
+      <button class="tab-button active" onclick="switchTab('normal')">Normal Flavours</button>
+      <button class="tab-button" onclick="switchTab('weird')">Weird Flavours</button>
+    </div>
+
+    <!-- Normal Ice Cream Tab Content -->
+    <div id="normalTab" class="tab-content active">
+      <button id="generateNormalButton" class="action-button green">Generate Normal Flavor</button>
+      <h3>Generated Normal Flavours:</h3>
+      <ul id="normalFlavorList" class="flavor-list"></ul>
+      <h3>Deleted Normal Flavours:</h3>
+      <ul id="deletedNormalFlavorsList" class="flavor-list"></ul>
+    </div>
+
+    <!-- Weird Ice Cream Tab Content -->
+    <div id="weirdTab" class="tab-content">
+      <button id="generateWeirdButton" class="action-button green">Generate Weird Flavor</button>
+      <h3>Generated Weird Flavours:</h3>
+      <ul id="weirdFlavorList" class="flavor-list"></ul>
+      <h3>Deleted Weird Flavours:</h3>
+      <ul id="deletedWeirdFlavorsList" class="flavor-list"></ul>
+    </div>
+
+    <!-- Buttons for Sorting, Clearing, and Downloading -->
+    <div class="button-group">
+      <button id="sortButton" class="action-button green">Sort Alphabetically</button>
+      <button id="clearAllButton" class="action-button red">Clear all</button>
+      <button id="clearGeneratedButton" class="action-button red">Clear Generated Flavors</button>
+      <button id="clearDeletedButton" class="action-button red">Clear Deleted Flavors</button>
+      <button id="randomFlavorButton" class="action-button green">Select Random Flavor</button> <!-- New Button -->
+    </div>
+
+    <!-- File Name Section -->
+    <div class="download-section">
+      <input type="text" id="fileNameInput" class="input-field" placeholder="File Name" />
+    </div>
+
+    <!-- Download List Button -->
+    <button id="downloadButton" class="action-button green">Download List</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
+
+<script>
+  // Your existing code...
+  // Add the random flavor selection feature
+  document.getElementById("randomFlavorButton").addEventListener("click", function() {
+    let selectedFlavor;
+    if (document.getElementById("normalTab").classList.contains("active")) {
+      if (normalFlavors.length > 0) {
+        selectedFlavor = normalFlavors[Math.floor(Math.random() * normalFlavors.length)];
+      }
+    } else if (document.getElementById("weirdTab").classList.contains("active")) {
+      if (weirdFlavors.length > 0) {
+        selectedFlavor = weirdFlavors[Math.floor(Math.random() * weirdFlavors.length)];
+      }
+    }
+    if (selectedFlavor) {
+      alert(`Selected Flavor: ${selectedFlavor}`);
+    } else {
+      alert("No flavors available to select.");
+    }
+  });
+  // Your existing code continues...
+</script>

@@ -1,0 +1,208 @@
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body and Container */
+body {
+  font-family: "Arial", sans-serif;
+  background-color: #f1f1f1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-image: url("https://www.example.com/ice-cream-theme.jpg"); /* Ice cream theme background */
+  background-size: cover;
+  background-position: center;
+}
+
+.container {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.tab-button {
+  padding: 12px 30px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 8px 8px 0 0;
+  background-color: #e0f7fa; /* Lighter green for active tabs */
+  margin: 0 10px;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background-color 0.3s, transform 0.2s ease-in-out;
+}
+
+.tab-button.active {
+  background-color: #66bb6a; /* Lighter green for active tab */
+  color: white;
+  transform: scale(1.05);
+}
+
+.tab-button:hover {
+  background-color: #ddd;
+  transform: scale(1.1);
+}
+
+/* Tab Content */
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.flavor-list {
+  list-style-type: none;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+/* Button Styling for Delete and Restore (Enhanced Design) */
+.deleteButton,
+.restoreButton {
+  font-size: 12px;
+  padding: 5px 8px; /* Smaller padding for closer buttons */
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 25px; /* Rounded corners for a modern look */
+  transition: background-color 0.3s, transform 0.2s ease-in-out, box-shadow 0.3s;
+  margin-left: 5px; /* Reduced space between the text and button */
+  display: inline-block;
+  text-align: center;
+  font-weight: 600; /* Bold text for emphasis */
+  min-width: 50px; /* Set a minimum width to make buttons uniform */
+}
+
+.deleteButton {
+  background-color: #ff6666; /* Softer red for a more pleasant look */
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Soft shadow for depth */
+}
+
+.deleteButton:hover {
+  background-color: #e60000; /* Darker red for hover */
+  transform: scale(1.1); /* Subtle grow effect on hover */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Slightly stronger shadow on hover */
+}
+
+.restoreButton {
+  background-color: #4caf50; /* Softer green for a more pleasant look */
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Soft shadow for depth */
+}
+
+.restoreButton:hover {
+  background-color: #45a049; /* Darker green for hover */
+  transform: scale(1.1); /* Subtle grow effect on hover */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Slightly stronger shadow on hover */
+}
+
+/* Focus Styling for Accessibility */
+.deleteButton:focus,
+.restoreButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(0, 128, 0, 0.4); /* Focus ring */
+}
+
+/* Adjust for Better Button Spacing in Lists */
+.flavor-list li {
+  margin-bottom: 15px; /* Increased space between list items */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px; /* Slightly larger text for better readability */
+}
+
+/* General list items styling */
+.flavor-list li button {
+  margin-left: 5px; /* Reduced margin for better spacing */
+}
+
+/* Input and Download Section */
+.input-field {
+  padding: 10px;
+  width: 80%;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+/* Button Styling for Sorting and Clearing (New Button Styles) */
+.action-button {
+  font-size: 16px;
+  padding: 12px 25px;
+  cursor: pointer;
+  border: none;
+  border-radius: 25px;
+  transition: background-color 0.3s, transform 0.2s ease-in-out, box-shadow 0.3s;
+  font-weight: bold;
+  margin: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Green button for "Generate Normal Flavor" and "Generate Weird Flavor" */
+.action-button.green {
+  background-color: #66bb6a; /* Green for "Generate" buttons */
+  color: white;
+}
+
+.action-button.green:hover {
+  background-color: #45a049; /* Darker green for hover */
+  transform: scale(1.05);
+}
+
+/* Red buttons for "Clear All Flavours", "Clear Generated Flavours", "Clear Deleted Flavours" */
+.action-button.red {
+  background-color: #e60000;
+  color: white;
+}
+
+.action-button.red:hover {
+  background-color: #cc0000;
+  transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .container {
+    width: 100%;
+    padding: 15px;
+  }
+
+  button,
+  .input-field {
+    width: 100%;
+  }
+
+  .tab-button {
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+
+  .deleteButton,
+  .restoreButton {
+    font-size: 14px;
+    padding: 6px 12px;
+    margin-left: 5px; /* Keep buttons close together */
+  }
+}
