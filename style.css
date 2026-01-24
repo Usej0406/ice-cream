@@ -19,10 +19,10 @@
   --sweet-icon: #e796ff;
   --sweet-border: #d6b5e3;
   
-  --weird-bg: #1a1625;
+  --weird-bg: #0f0a1a;
   --weird-text: #c8b3ff;
-  --weird-icon: #9b7ee6;
-  --weird-border: #3d2f5a;
+  --weird-icon: #8b6ed9;
+  --weird-border: #2a1f3d;
   
   /* UI Elements */
   --accent-green: #10d97f;
@@ -56,10 +56,10 @@
   --sweet-icon: #e796ff;
   --sweet-border: #3d2f5a;
   
-  --weird-bg: #1a1625;
+  --weird-bg: #0f0a1a;
   --weird-text: #c8b3ff;
-  --weird-icon: #9b7ee6;
-  --weird-border: #3d2f5a;
+  --weird-icon: #8b6ed9;
+  --weird-border: #2a1f3d;
   
   --badge-bg: #3d1f3a;
   --badge-text: #ff8fd9;
@@ -380,8 +380,8 @@ body {
 }
 
 .category-weird:hover {
-  border-color: #9b7ee6;
-  background: linear-gradient(135deg, var(--weird-bg) 0%, rgba(155, 126, 230, 0.2) 100%);
+  border-color: #8b6ed9;
+  background: linear-gradient(135deg, var(--weird-bg) 0%, rgba(139, 110, 217, 0.3) 100%);
 }
 
 .category-weird:hover .category-icon {
@@ -391,7 +391,7 @@ body {
 .category-weird.active {
   background: linear-gradient(135deg, var(--weird-bg) 0%, var(--weird-border) 100%);
   box-shadow: 0 0 0 3px var(--weird-border);
-  border-color: #c8b3ff;
+  border-color: #8b6ed9;
 }
 
 /* ==================== History Section ==================== */
