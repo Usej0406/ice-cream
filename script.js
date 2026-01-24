@@ -305,7 +305,7 @@ function downloadHistory() {
     return;
   }
   
-  let content = '🍦 ScoopsAI - Ice Cream Flavor History\n';
+  let content = '🍦 Ice Cream Flavor History\n';
   content += '=====================================\n\n';
   
   const sweetFlavors = flavors.filter(f => f.category === 'sweet');
@@ -391,13 +391,13 @@ function createConfetti() {
 
 // ==================== Info Modal ====================
 function showInfo() {
-  alert('🍦 ScoopsAI - AI Ice Cream Generator\n\n' +
+  alert('🍦 AI Ice Cream Generator\n\n' +
         'Generate creative ice cream flavors!\n\n' +
         '🍨 Sweet & Safe: Classic delicious flavors\n' +
         '🤪 Weird & Wild: Adventurous combinations\n\n' +
         '❤️ Click the heart to favorite flavors\n' +
         '🗑️ Click the trash to delete flavors\n\n' +
-        'Made with ❤️ by ScoopsAI');
+        'Made with ❤️');
 }
 
 // ==================== Event Listeners ====================
