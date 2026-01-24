@@ -1,858 +1,461 @@
-let normalFlavors = [];
-let weirdFlavors = [];
-let deletedNormalFlavors = [];
-let deletedWeirdFlavors = [];
+// ==================== State Management ====================
+let flavors = [];
+let currentFilter = 'all';
+let currentCategory = 'sweet';
 
-let undoStackNormal = []; // Stack to store the previous actions for normal tab
-let undoStackWeird = []; // Stack to store the previous actions for weird tab
+// ==================== Local Storage ====================
+const STORAGE_KEY = 'scoopsai_flavors';
+const THEME_KEY = 'scoopsai_theme';
 
-// Switch tabs for Normal and Weird Flavors
-function switchTab(tab) {
-  if (tab === "normal") {
-    document.getElementById("normalTab").classList.add("active");
-    document.getElementById("weirdTab").classList.remove("active");
-    document.querySelector(".tab-button.active").classList.remove("active");
-    document.querySelector(".tab-button:nth-child(1)").classList.add("active");
+function saveFlavors() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(flavors));
+}
+
+function loadFlavors() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    flavors = JSON.parse(saved);
+    updateUI();
+  }
+}
+
+// ==================== Theme Management ====================
+function initTheme() {
+  const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+}
+
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem(THEME_KEY, newTheme);
+}
+
+// ==================== Flavor Data ====================
+const sweetFlavors = [
+  "Vanilla", "Chocolate", "Strawberry", "Mint", "Coffee", "Cookie Dough", 
+  "Pistachio", "Caramel", "Cookies and Cream", "Neapolitan", "Raspberry", 
+  "Lemon", "Mango", "Butterscotch", "Rocky Road", "Blackberry", "Peach", 
+  "Maple Pecan", "Cotton Candy", "Tiramisu", "Salted Caramel", "Almond Joy",
+  "Toffee Crunch", "Banana Split", "S'mores", "Cherry Garcia", "Pumpkin Spice",
+  "Butter Pecan", "Blueberry Cheesecake", "Apple Cinnamon", "Lemon Meringue",
+  "Orange Sorbet", "Matcha", "Brown Sugar Cinnamon", "Cinnamon Roll",
+  "Coconut Crunch", "Pineapple Paradise", "Caramel Pecan", "Tropical Fruit",
+  "Peach Cobbler", "Cinnamon Apple", "Basil Honey", "Honey Lavender",
+  "Chocolate Chip Cookie", "Coconut Cream Pie", "Toasted Almond", "Maple Walnut",
+  "Chocolate Mint", "Peach Melba", "Chocolate Fudge Swirl", "Apple Pie",
+  "Carrot Cake", "Chocolate Brownie", "Cookie Butter", "Maple Bacon",
+  "White Chocolate Raspberry", "Red Velvet", "Churros", "Lemon Curd"
+];
+
+const weirdFlavors = [
+  "Bacon", "Pickle", "Spaghetti", "Wasabi", "Sriracha", "Garlic", "Curry",
+  "Bubblegum with Cheese", "Chocolate and Chili", "Mustard", "Cucumber",
+  "Olive", "Eggplant", "Cauliflower", "Vinegar", "Mochi", "Coconut Curry",
+  "Cheddar Cheese", "Hot Sauce", "Anchovy", "Ranch", "Cotton Candy and Popcorn",
+  "Ketchup", "Maple Syrup", "Chili with Lime", "Potato Chips", "Salami",
+  "Squid Ink", "Durian", "Caviar", "Cheese Pizza", "Spaghetti Bolognese",
+  "Avocado", "Miso Soup", "Hot Dog", "Black Licorice", "Truffle",
+  "Pickled Beets", "Sweet Corn", "Celery", "Pickled Ginger", "Raw Meat",
+  "Fish Sauce", "Sweet Pickles", "Olive Oil", "Radish", "Pickled Cabbage",
+  "Peanut Butter and Jelly", "Sauerkraut", "Chocolate Bacon", "Dill Pickle",
+  "Hot Pepper Jelly", "Spicy Mango", "Salmon with Lemon", "Garlic Parmesan",
+  "Sweet Potato", "Gorgonzola Cheese", "Curry Pineapple", "Tuna Fish",
+  "Blue Cheese and Berries", "Bacon-wrapped Dates", "Sweet Onion", "Beef Jerky",
+  "Seaweed", "Cheese Curds", "Brussels Sprouts", "Chicken Teriyaki",
+  "Clam Chowder", "Pork Belly", "Gorgonzola and Pear", "Roasted Garlic"
+    ];
+
+    const addIns = [
+  "Chocolate Chips", "Peanut Butter Swirl", "Oreos", "Brownie Chunks",
+  "Fruit Swirl", "Marshmallows", "Nuts", "Coconut Flakes", "Fudge Sauce",
+  "Candy Pieces", "Crushed Graham Crackers", "Caramel Swirl",
+  "White Chocolate Chips", "Rainbow Sprinkles", "Chopped Almonds",
+  "Biscotti Pieces", "Toffee Crunch", "Cookie Dough Chunks", "Pretzel Bits",
+  "Honeycomb Crunch", "Raspberry Ribbons", "Salted Caramel Drizzle"
+];
+
+// ==================== Flavor Generation ====================
+function generateFlavor(category) {
+  const baseList = category === 'sweet' ? sweetFlavors : weirdFlavors;
+  const randomBase = baseList[Math.floor(Math.random() * baseList.length)];
+  const randomAddIn = addIns[Math.floor(Math.random() * addIns.length)];
+  
+  const flavorName = `${randomBase} ${randomAddIn}`;
+  
+  const flavor = {
+    id: Date.now() + Math.random(),
+    name: flavorName,
+    category: category,
+    isFavorite: false,
+    timestamp: new Date().toISOString(),
+    colorClass: category === 'sweet' ? `color-${Math.floor(Math.random() * 10) + 1}` : ''
+  };
+  
+  flavors.unshift(flavor);
+  saveFlavors();
+  updateUI();
+  updateHeroTitle(flavorName, category);
+  
+  // Animate the hero title
+  animateHeroTitle();
+  
+  // Create confetti effect
+  createConfetti();
+}
+
+function updateHeroTitle(title, category = 'sweet') {
+  const heroTitle = document.getElementById('currentFlavor');
+  const heroBadge = document.querySelector('.hero-badge');
+  
+  heroTitle.style.opacity = '0';
+  heroTitle.style.transform = 'translateY(20px)';
+  
+  setTimeout(() => {
+    heroTitle.textContent = title;
+    heroTitle.style.opacity = '1';
+    heroTitle.style.transform = 'translateY(0)';
+    
+    // Update badge text based on category
+    if (category === 'weird') {
+      heroBadge.textContent = '⚠️ WARNING: WEIRD FLAVOR';
+      heroBadge.style.background = 'linear-gradient(135deg, #3d1f3a 0%, #9b7ee6 100%)';
+      heroBadge.style.color = '#c8b3ff';
+    } else {
+      heroBadge.textContent = 'FRESHLY CHURNED';
+      heroBadge.style.background = 'var(--badge-bg)';
+      heroBadge.style.color = 'var(--badge-text)';
+    }
+  }, 200);
+}
+
+function animateHeroTitle() {
+  const heroTitle = document.getElementById('currentFlavor');
+  heroTitle.style.animation = 'none';
+  setTimeout(() => {
+    heroTitle.style.animation = 'fadeInUp 0.6s ease';
+  }, 10);
+}
+
+// ==================== Favorites Management ====================
+function toggleFavorite(id) {
+  const flavor = flavors.find(f => f.id === id);
+  if (flavor) {
+    flavor.isFavorite = !flavor.isFavorite;
+    saveFlavors();
+    updateUI();
+    
+    // Create floating heart animation if favorited
+    if (flavor.isFavorite) {
+      const favoriteBtn = document.querySelector(`[data-id="${id}"] .favorite-btn`);
+      if (favoriteBtn) {
+        createFloatingHearts(favoriteBtn);
+      }
+    }
+  }
+}
+
+function createFloatingHearts(element) {
+  const rect = element.getBoundingClientRect();
+  const container = document.getElementById('heartsContainer');
+  
+  // Create 5 floating hearts
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+      const heart = document.createElement('div');
+      heart.className = 'floating-heart';
+      heart.innerHTML = '❤️';
+      heart.style.left = `${rect.left + rect.width / 2 + (Math.random() - 0.5) * 40}px`;
+      heart.style.top = `${rect.top + rect.height / 2}px`;
+      container.appendChild(heart);
+      
+      setTimeout(() => {
+        heart.remove();
+      }, 2000);
+    }, i * 100);
+  }
+}
+
+// ==================== Delete Flavor ====================
+function deleteFlavor(id) {
+  flavors = flavors.filter(f => f.id !== id);
+  saveFlavors();
+  updateUI();
+}
+
+// ==================== Filter Management ====================
+function setFilter(filter) {
+  currentFilter = filter;
+  updateUI();
+}
+
+function filterFlavors() {
+  if (currentFilter === 'all') {
+    return flavors;
+  } else if (currentFilter === 'favorites') {
+    return flavors.filter(f => f.isFavorite);
+  } else if (currentFilter === 'sweet') {
+    return flavors.filter(f => f.category === 'sweet');
+  } else if (currentFilter === 'weird') {
+    return flavors.filter(f => f.category === 'weird');
+  } else if (currentFilter === 'safe') {
+    return flavors.filter(f => f.category === 'sweet');
+  }
+  return flavors;
+}
+
+// ==================== UI Rendering ====================
+function updateUI() {
+  const flavorGrid = document.getElementById('flavorGrid');
+  const emptyState = document.getElementById('emptyState');
+  const historyCount = document.getElementById('historyCount');
+  
+  const filteredFlavors = filterFlavors();
+  
+  // Update count
+  historyCount.textContent = filteredFlavors.length;
+  
+  // Clear grid
+  flavorGrid.innerHTML = '';
+  
+  // Show empty state if no flavors
+  if (filteredFlavors.length === 0) {
+    emptyState.classList.remove('hidden');
+    return;
+  }
+  
+  emptyState.classList.add('hidden');
+  
+  // Render flavor cards
+  filteredFlavors.forEach(flavor => {
+    const card = createFlavorCard(flavor);
+    flavorGrid.appendChild(card);
+  });
+  
+  // Update filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === currentFilter);
+  });
+}
+
+function createFlavorCard(flavor) {
+  const card = document.createElement('div');
+  card.className = 'flavor-card';
+  card.dataset.id = flavor.id;
+  
+  const timeAgo = getTimeAgo(flavor.timestamp);
+  
+  // Determine the color class for the flavor name
+  const colorClass = flavor.category === 'sweet' ? flavor.colorClass : 'weird';
+  
+  card.innerHTML = `
+    <div class="flavor-card-header">
+      <div class="flavor-badge ${flavor.category}">
+        ${flavor.category === 'sweet' ? `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        ` : `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
+          </svg>
+        `}
+        ${flavor.category === 'sweet' ? 'SWEET' : 'WEIRD'}
+      </div>
+      <span class="flavor-time">${timeAgo}</span>
+    </div>
+    <div class="flavor-name ${colorClass}">${flavor.name}</div>
+    <div class="flavor-card-footer">
+      <button class="favorite-btn ${flavor.isFavorite ? 'active' : ''}" onclick="toggleFavorite(${flavor.id})" aria-label="Toggle favorite">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="${flavor.isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+      </button>
+      <button class="delete-btn" onclick="deleteFlavor(${flavor.id})" aria-label="Delete flavor">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          <line x1="10" y1="11" x2="10" y2="17"/>
+          <line x1="14" y1="11" x2="14" y2="17"/>
+        </svg>
+      </button>
+    </div>
+  `;
+  
+  return card;
+}
+
+// ==================== Time Formatting ====================
+function getTimeAgo(timestamp) {
+  const now = new Date();
+  const past = new Date(timestamp);
+  const seconds = Math.floor((now - past) / 1000);
+  
+  if (seconds < 60) return `${seconds}s`;
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
+  return `${Math.floor(seconds / 86400)}d`;
+}
+
+// ==================== Download History ====================
+function downloadHistory() {
+  if (flavors.length === 0) {
+    alert('No flavors to download!');
+    return;
+  }
+  
+  let content = '🍦 ScoopsAI - Ice Cream Flavor History\n';
+  content += '=====================================\n\n';
+  
+  const sweetFlavors = flavors.filter(f => f.category === 'sweet');
+  const weirdFlavors = flavors.filter(f => f.category === 'weird');
+  const favorites = flavors.filter(f => f.isFavorite);
+  
+  if (favorites.length > 0) {
+    content += '❤️ FAVORITES:\n';
+    favorites.forEach(f => {
+      content += `  • ${f.name}\n`;
+    });
+    content += '\n';
+  }
+  
+  if (sweetFlavors.length > 0) {
+    content += '🍨 SWEET & SAFE:\n';
+    sweetFlavors.forEach(f => {
+      const fav = f.isFavorite ? '❤️ ' : '';
+      content += `  ${fav}• ${f.name}\n`;
+    });
+    content += '\n';
+  }
+  
+  if (weirdFlavors.length > 0) {
+    content += '🤪 WEIRD & WILD:\n';
+    weirdFlavors.forEach(f => {
+      const fav = f.isFavorite ? '❤️ ' : '';
+      content += `  ${fav}• ${f.name}\n`;
+    });
+    content += '\n';
+  }
+  
+  content += `\nGenerated: ${new Date().toLocaleString()}\n`;
+  content += 'Total Flavors: ' + flavors.length + '\n';
+  
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `scoopsai-flavors-${Date.now()}.txt`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+// ==================== Clear History ====================
+function clearHistory() {
+  if (flavors.length === 0) {
+    alert('No flavors to clear!');
+    return;
+  }
+  
+  if (confirm('Are you sure you want to clear all flavor history? This cannot be undone.')) {
+    flavors = [];
+    saveFlavors();
+    updateUI();
+    updateHeroTitle('Velvety Chocolate Fruit');
+  }
+}
+
+// ==================== Confetti Effect ====================
+function createConfetti() {
+  const colors = ['#10d97f', '#ff6b9d', '#b847d9', '#47d9ff', '#ff9f47', '#9b7ee6'];
+  const shapes = ['star', 'circle', 'line'];
+  
+  for (let i = 0; i < 30; i++) {
+    setTimeout(() => {
+      const confetti = document.createElement('div');
+      confetti.className = `confetti ${shapes[Math.floor(Math.random() * shapes.length)]}`;
+      confetti.style.left = `${Math.random() * 100}%`;
+      confetti.style.top = '-20px';
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+      confetti.style.animationDuration = `${2 + Math.random() * 2}s`;
+      
+      document.body.appendChild(confetti);
+      
+      setTimeout(() => {
+        confetti.remove();
+      }, 4000);
+    }, i * 30);
+  }
+}
+
+// ==================== Info Modal ====================
+function showInfo() {
+  alert('🍦 ScoopsAI - AI Ice Cream Generator\n\n' +
+        'Generate creative ice cream flavors!\n\n' +
+        '🍨 Sweet & Safe: Classic delicious flavors\n' +
+        '🤪 Weird & Wild: Adventurous combinations\n\n' +
+        '❤️ Click the heart to favorite flavors\n' +
+        '🗑️ Click the trash to delete flavors\n\n' +
+        'Made with ❤️ by ScoopsAI');
+}
+
+// ==================== Event Listeners ====================
+function initEventListeners() {
+  // Theme toggle
+  document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+  
+  // Info button
+  document.getElementById('infoButton').addEventListener('click', showInfo);
+  
+  // Category buttons
+  document.querySelectorAll('.category-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const category = btn.dataset.category;
+      currentCategory = category;
+      
+      // Update active state
+      document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      // Generate flavor
+      generateFlavor(category);
+    });
+  });
+  
+  // Filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setFilter(btn.dataset.filter);
+    });
+  });
+  
+  // Download history
+  document.getElementById('downloadHistory').addEventListener('click', downloadHistory);
+  
+  // Clear history
+  document.getElementById('clearHistory').addEventListener('click', clearHistory);
+}
+
+// ==================== Initialization ====================
+function init() {
+  initTheme();
+  loadFlavors();
+  initEventListeners();
+  
+  // If no flavors, show default title
+  if (flavors.length === 0) {
+    updateHeroTitle('Velvety Chocolate Fruit');
   } else {
-    document.getElementById("weirdTab").classList.add("active");
-    document.getElementById("normalTab").classList.remove("active");
-    document.querySelector(".tab-button.active").classList.remove("active");
-    document.querySelector(".tab-button:nth-child(2)").classList.add("active");
+    // Show the most recent flavor
+    updateHeroTitle(flavors[0].name);
   }
 }
 
-// Generate Normal Flavor with Duplicate Check
-document
-  .getElementById("generateNormalButton")
-  .addEventListener("click", function () {
-    const baseFlavors = [
-      "Vanilla",
-      "Chocolate",
-      "Strawberry",
-      "Mint",
-      "Coffee",
-      "Cookie Dough",
-      "Pistachio",
-      "Caramel",
-      "Cookies and Cream",
-      "Neapolitan",
-      "Raspberry",
-      "Lemon",
-      "Mango",
-      "Butterscotch",
-      "Rocky Road",
-      "Blackberry",
-      "Peach",
-      "Maple Pecan",
-      "Cotton Candy",
-      "Tiramisu",
-      "Salted Caramel",
-      "Almond Joy",
-      "Toffee Crunch",
-      "Banana Split",
-      "S'mores",
-      "Cherry Garcia",
-      "Pumpkin Spice",
-      "Butter Pecan",
-      "Blueberry Cheesecake",
-      "Apple Cinnamon",
-      "Lemon Meringue",
-      "Orange Sorbet",
-      "Matcha",
-      "Butter Pecan",
-      "Brown Sugar Cinnamon",
-      "Cinnamon Roll",
-      "Raisin",
-      "Coconut Crunch",
-      "Pineapple, Papaya",
-      "Caramel Pecan",
-      "Tropical Fruit",
-      "Peach Cobbler",
-      "Cinnamon Apple",
-      "Basil Honey",
-      "Honey Lavender",
-      "Chocolate Chip Cookie",
-      "Coconut Cream Pie",
-      "Toasted Almond",
-      "Maple Walnut",
-      "Chocolate Mint",
-      "Peach Melba",
-      "Chocolate Fudge Swirl",
-      "Apple Pie",
-      "Carrot Cake",
-      "Chocolate Brownie",
-      "Cookie Butter",
-      "Maple Bacon",
-      "White Chocolate Raspberry",
-      "S'mores Swirl",
-      "Lemon Sorbet",
-      "Peach Sorbet",
-      "Cranberry Orange",
-      "Red Velvet",
-      "Blackberry Cheesecake",
-      "Churros",
-      "Lemon Curd",
-      "Kiwi Lime",
-      "Orange Blossom",
-      "Cinnamon Toast Crunch",
-      "Apple Cider Donut",
-      "Mango Tango",
-      "Pineapple Coconut",
-      "Lemon Zest",
-      "Tiramisu Coffee",
-      "Mocha Almond Fudge",
-      "Hazelnut",
-      "Chocolate Truffle",
-      "Smoked Salt Caramel",
-      "Bubblegum",
-      "Pistachio Honey",
-      "Watermelon Sorbet",
-      "Blackberry Lavender",
-      "French Vanilla",
-      "Cherry Almond",
-      "Marshmallow Swirl",
-      "Strawberry Rhubarb",
-      "Brownie Batter",
-      "Fig and Honey",
-      "Choco-Matcha Crunch",
-      "Macadamia Nut",
-      "Earl Grey Vanilla",
-      "Chocolate Caramel Swirl",
-      "Pomegranate",
-      "Lemon Basil",
-      "Hazelnut Crunch",
-      "Oatmeal Cookie",
-      "Fudge Brownie",
-      "Cranberry Pistachio",
-      "Apple Cinnamon Streusel",
-      "Tangerine Sorbet",
-      "Apricot Brandy",
-      "Sweet Potato",
-      "Chocolate Chip Mint",
-      "Banana Fudge",
-      "Sweet Cinnamon",
-      "Green Tea Matcha",
-      "Chocolate Coconut",
-      "Raspberry Truffle",
-      "Cherry Cheesecake",
-      "Caramel Apple",
-      "Chocolate Cherry Swirl",
-      "Praline Pecan",
-      "Wildberry",
-      "Honey Almond",
-      "Dark Chocolate Raspberry",
-      "Salted Honeycomb",
-      "Coconut Pineapple",
-      "Choco Coconut Almond",
-      "Papaya Sorbet",
-      "Blueberry Lemonade",
-      "Brown Sugar Pecan",
-      "Pear and Ginger",
-      "Choco-Banana Chip",
-      "Chocolate Hazelnut Truffle",
-      "Raspberry Lychee",
-      "Milk Chocolate Peanut Butter",
-      "Coconut Fudge Brownie",
-      "Tropical Dream",
-      "Lemon Vanilla Bean",
-      "Maple Pecan Praline",
-      "Coffee Caramel Swirl",
-      "Red Currant",
-      "Butter Toffee Crunch",
-      "Coconut Lime Sorbet",
-      "Choco-Nut Brownie",
-      "Wild Peach",
-      "Strawberry Banana",
-      "Peach Melba",
-      "Orange Creamsicle",
-      "Cinnamon Peach",
-      "Blueberry Maple",
-      "Pecan Pie",
-      "Bourbon Pecan",
-      "Apple and Brie",
-      "Coconut Pumpkin Spice",
-      "Cinnamon Maple",
-      "S'mores Delight",
-      "Mocha Pecan",
-      "Salted Pretzel",
-      "Almond Croissant",
-      "Maple Cinnamon Roll",
-      "Buttermilk Pancake",
-      "Cinnamon Toast",
-      "Honeycomb Caramel",
-      "Pumpkin Cheesecake",
-      "Spicy Churros",
-      "Raspberry Cream Cheese",
-      "Gingerbread Latte",
-      "Caramel Popcorn",
-      "Cherry Limeade",
-      "Ginger Caramel",
-      "Blueberry Yogurt",
-      "Apple Fritter",
-      "Raisin Swirl",
-      "White Chocolate Matcha",
-      "Sage Honey",
-      "Cranberry Lime",
-      "Banana Nut Crunch",
-      "Coconut Rice Pudding",
-      "Raspberry Sorbet",
-      "Peach Bellini",
-      "Cinnamon Almond",
-      "Choco Chip Cookie Dough",
-      "Avocado Lime",
-      "Saffron Honey",
-      "Smoked Maple Bacon",
-      "Caramelized Pear",
-      "Spiced Apple Cider",
-      "Coconut Cream",
-      "Taro Milk Tea",
-      "Toffee Nut",
-      "Chocolate Hazelnut Spread",
-      "Peach Vanilla Bean",
-      "Coconut Chocolate Chip",
-      "Coconut Caramel",
-      "Tiramisu Crunch",
-      "Matcha Red Bean",
-      "Strawberry Lemonade",
-      "Caramel Apple Pie",
-      "Passionfruit Sorbet",
-      "Peach Nectar",
-      "Coconut Lush",
-      "Cinnamon Custard",
-      "Carrot Cake Cream Cheese",
-      "Almond Pistachio",
-      "Peach Grapefruit",
-      "Lemon Basil Sorbet",
-      "Pumpkin Maple Swirl",
-      "Oatmeal Cream Pie",
-      "Maple Sugar",
-      "Pineapple Passionfruit",
-      "Mango Orange Sorbet",
-      "Spiced Caramel Pecan",
-      "Ginger Lemon",
-      "Chai Latte",
-      "Choco-Cinnamon Swirl",
-      "Maple French Toast",
-      "Coffee Toffee Crunch",
-      "Raisin Nut",
-      "Lemon Ricotta",
-      "Salted Honey Lemon",
-      "Ginger Pear",
-      "Blueberry Lavender",
-      "Brown Sugar Vanilla",
-      "Mango Chutney",
-      "Bourbon Caramel Pecan",
-      "Mocha Marshmallow",
-      "Maple Lemonade",
-      "Spiced Chocolate",
-      "Pistachio Date",
-      "Cinnamon Fig",
-      "Orange Cardamom",
-      "Coconut Banana",
-      "Chocolate Raspberry Swirl",
-      "Toasted Pecan",
-      "Strawberry Coffee",
-      "Lime Gingerade",
-      "Pineapple Chili",
-      "Maple Cinnamon Sugar",
-      "Matcha Macadamia",
-      "Plum Sorbet",
-      "Coconut Pistachio",
-      "Fennel Orange",
-      "Gingerbread Truffle",
-      "Raspberry Champagne",
-      "Chili Chocolate",
-      "Fruity Cereal",
-      "Lime Cilantro",
-      "Honey Ginger",
-      "Spicy Pineapple",
-      "Banana Macadamia",
-      "Choco Orange",
-      "Coconut Lemon",
-      "Honey Fennel",
-      "Roasted Cherry",
-      "Toasted Coconut Banana",
-      "Mango Pineapple",
-      "Chili Mango",
-      "Cinnamon Blackberry",
-      "Raspberry Truffle",
-      "Peach Melba Swirl",
-      "Raspberry Honeycomb",
-      "Coconut Caramel Swirl",
-      "Pistachio Vanilla Bean",
-      "Tart Cherry",
-      "Brown Butter",
-      "Cinnamon Cardamom",
-      "Pumpkin Ginger",
-      "Coconut Mango Swirl",
-      "Passionfruit Honey",
-      "Blackberry Lime",
-      "Peach Raspberry Sorbet",
-      "Balsamic Strawberry",
-      "Tropical Sorbet",
-      "Maple Brown Sugar",
-      "Pineapple Coconut Cream",
-      "Saffron Pistachio",
-      "Avocado Coconut",
-      "Lemon Coconut",
-      "Strawberry Rhubarb Pie",
-      "Lemon Poppy Seed",
-      "Hibiscus",
-      "Chili Pepper",
-      "Smoked Bacon",
-      "Raspberry Vinegar",
-      "Peach Orange",
-      "Pineapple Jasmine",
-      "Choco Hazelnut Fudge",
-      "Rosemary Honey",
-      "Ginger Lemon Sorbet",
-      "Chili Coconut",
-      "Carrot Cake Spice",
-      "Butterfinger",
-      "Key Lime",
-      "Sriracha Peach",
-      "Coconut Choco Truffle",
-      "Mango Ginger Sorbet",
-      "Blackberry Honeycomb",
-      "Raspberry Mocha",
-      "Vanilla Almond Butter",
-      "Mango Key Lime",
-      "Lemon Blackberry",
-      "Lemon Chia",
-      "Apple Orange Blossom",
-      "Saffron Vanilla Bean",
-      "Ginger Cinnamon",
-      "Apple Cranberry",
-      "Lemonade Pistachio",
-      "Maple Bourbon",
-      "Coconut Butter",
-      "Almond Maple Crunch",
-      "Lemon Poppyseed",
-      "Rose Sorbet",
-      "Choco Coconut Lush",
-      "Mango Avocado"
-    ];
+// Start the app
+document.addEventListener('DOMContentLoaded', init);
 
-    const addIns = [
-      "Chocolate Chips",
-      "Peanut Butter Swirl",
-      "Oreos",
-      "Brownie Chunks",
-      "Fruit Swirl",
-      "Marshmallows",
-      "Nuts",
-      "Coconut Flakes",
-      "Fudge Sauce",
-      "Candy Pieces",
-      "Crushed Graham Crackers",
-      "Caramel Swirl",
-      "White Chocolate Chips",
-      "Rainbow Sprinkles",
-      "Chopped Almonds",
-      "Biscotti Pieces",
-      "Toffee Crunch"
-    ];
-
-    const randomBase =
-      baseFlavors[Math.floor(Math.random() * baseFlavors.length)];
-    const randomAddIn = addIns[Math.floor(Math.random() * addIns.length)];
-
-    const generatedFlavor = `${randomBase} with ${randomAddIn}`;
-
-    // Check if flavor already exists before adding it
-    if (!normalFlavors.includes(generatedFlavor)) {
-      normalFlavors.unshift(generatedFlavor); // Add the new flavor at the top
-      updateNormalFlavorList();
-    }
-  });
-
-// Generate Weird Flavor with Duplicate Check
-document
-  .getElementById("generateWeirdButton")
-  .addEventListener("click", function () {
-    const weirdFlavorsList = [
-      "Bacon",
-      "Pickle",
-      "Spaghetti",
-      "Wasabi",
-      "Sriracha",
-      "Garlic",
-      "Curry",
-      "Bubblegum with Cheese",
-      "Chocolate and Chili",
-      "Mustard",
-      "Cucumber",
-      "Olive",
-      "Eggplant",
-      "Cauliflower",
-      "Vinegar",
-      "Mochi",
-      "Coconut Curry",
-      "Cheddar Cheese",
-      "Hot Sauce",
-      "Anchovy",
-      "Ranch",
-      "Cotton Candy and Popcorn",
-      "Ketchup",
-      "Maple Syrup",
-      "Chili with Lime",
-      "Potato Chips",
-      "Salami",
-      "Squid Ink",
-      "Durian",
-      "Caviar",
-      "Cheese Pizza",
-      "Maple Bacon",
-      "Spaghetti Bolognese",
-      "Avocado",
-      "Miso Soup",
-      "Hot Dog",
-      "Black Licorice",
-      "Truffle",
-      "Pickled Beets",
-      "Sweet Corn",
-      "Celery",
-      "Pickled Ginger",
-      "Raw Meat",
-      "Fish Sauce",
-      "Bacon with Maple",
-      "Sweet Pickles",
-      "Olive Oil",
-      "Radish",
-      "Sriracha",
-      "Pickled Cabbage",
-      "Peanut Butter and Jelly",
-      "Sauerkraut",
-      "Chocolate Bacon",
-      "Peanut Butter and Chili",
-      "Sweet Pickled Beets",
-      "Dill Pickle and Mustard",
-      "Hot Pepper Jelly",
-      "Spicy Mango",
-      "Salmon with Lemon",
-      "Cucumber with Salt",
-      "Garlic Parmesan",
-      "Sweet Potato",
-      "Gorgonzola Cheese",
-      "Curry Pineapple",
-      "Tuna Fish",
-      "Mashed Potato",
-      "Blue Cheese and Berries",
-      "Bacon-wrapped Dates",
-      "Sweet Onion and Cabbage",
-      "Beef Jerky",
-      "Seaweed",
-      "Cheese Curds",
-      "Olive",
-      "Hot Chilli",
-      "Brussels Sprouts",
-      "Chicken Teriyaki",
-      "Clam Chowder",
-      "Pork Belly",
-      "Maple Syrup",
-      "Gorgonzola and Pear",
-      "Roasted Garlic",
-      "Onion Jam",
-      "Carrot Cake with Mustard",
-      "Cauliflower",
-      "Pickled Jalapenos",
-      "Spicy Hot Dog",
-      "Pizza with Mozzarella",
-      "Coconut Curry",
-      "Cheese Flavored Ice Cream",
-      "Onion Soup",
-      "Beef Taco",
-      "Sweet and Sour Sauce",
-      "Veggie Burger",
-      "Pickled Watermelon",
-      "Jalapeno Lime",
-      "Grape Jelly with Bacon",
-      "Lemon Miso",
-      "Fish Tacos",
-      "Grape Mustard",
-      "Tuna",
-      "Buffalo Wing",
-      "Chocolate Chili",
-      "Sweet Pickle with Cheese",
-      "Beef Wellington",
-      "Fennel",
-      "Salmon with Cream Cheese",
-      "Cranberry Sauce",
-      "Cream Cheese and Garlic",
-      "Pistachio with Garlic",
-      "Roasted Tomatoes",
-      "Lemonade with Basil",
-      "Mustard with Dill",
-      "Grilled Pineapple",
-      "Grilled Veggie",
-      "Strawberry with Cucumber",
-      "Pickled Lime",
-      "Ranch with Herbs",
-      "Steak with Pepper",
-      "Cheddar and Jalapeno",
-      "Chili Cheese Dog",
-      "Bacon and Blue Cheese",
-      "Caviar Sorbet",
-      "Peanut Butter Pickles",
-      "Mustard Bacon",
-      "Bubblegum Bacon",
-      "Pineapple and Cheese",
-      "Fried Chicken Ice Cream",
-      "Spicy Jalapeno and Blueberry",
-      "Chili Hot Dog",
-      "Pickled Avocado",
-      "Chili Chocolate Mint",
-      "Clam Sorbet",
-      "Oyster Cream",
-      "Barbecue Onion",
-      "Boiled Egg Sorbet",
-      "Pickled Honey",
-      "Fried Ice Cream",
-      "Raspberry Jalapeno",
-      "Pickled Cantaloupe",
-      "Chocolate Soy Sauce",
-      "Garlic Butter",
-      "Wasabi Lime",
-      "Sausage and Mustard",
-      "Salty Caramel Bacon",
-      "Pickled Mango",
-      "Maple Spicy Chocolate",
-      "Garlic and Bacon",
-      "Durian Coconut",
-      "Mashed Potato Sorbet",
-      "Taco Bell Ice Cream",
-      "Cheese Chili Mac",
-      "Coconut Fried Chicken",
-      "Blue Cheese Honey",
-      "Hot Dog with Mustard",
-      "Gravy Ice Cream",
-      "Egg Custard Bacon",
-      "Green Bean Casserole",
-      "Olive Oil Sorbet",
-      "Pumpkin Sriracha",
-      "Radish Pickle",
-      "Cucumber Garlic",
-      "Mustard Sorbet",
-      "Sriracha Mango",
-      "Potato Chip Sorbet",
-      "Olive and Dill",
-      "Pickled Corn",
-      "Bacon Hot Sauce",
-      "Ranch Chive",
-      "Squid Ink Sorbet",
-      "Spicy Tofu",
-      "Eggnog Wasabi",
-      "Pineapple Mustard",
-      "Maple Hot Chili",
-      "Brussels Sprout Chocolate",
-      "Cheddar Onion Soup",
-      "Coconut Caviar",
-      "Beef Jerky Sorbet",
-      "Sweet Pickled Onion",
-      "Mushroom Sriracha",
-      "Coconut Bacon",
-      "Cheddar Jalapeno Ice Cream",
-      "Fried Pickles",
-      "Garlic Herb Ice Cream",
-      "Spicy Apple Pie",
-      "Pickled Salmon",
-      "Cheddar Beer",
-      "Cheese Mustard Swirl",
-      "Jalapeno Salted Caramel",
-      "Sriracha Butter",
-      "Miso and Honeycomb",
-      "Tropical Durian",
-      "Bacon Lime Sorbet",
-      "Chili Watermelon",
-      "Hot Mustard Onion",
-      "Curry Chicken",
-      "Buffalo Mozzarella",
-      "Chocolate Basil",
-      "Pumpkin Caramelized Onion",
-      "Boiled Eggplant",
-      "Ranch Garlic",
-      "Steak and Potato",
-      "Beef Chili Sorbet",
-      "Mango Blue Cheese",
-      "Chocolate Chutney",
-      "Pumpkin Curry",
-      "Cabbage and Bacon",
-      "Garlic Cherry",
-      "Grilled Fish Sauce",
-      "Cucumber Cilantro",
-      "Barbecue Corn",
-      "Lemon Marmalade",
-      "Pickled Pumpkin",
-      "Eggplant Sorbet",
-      "Spicy Shrimp",
-      "Wasabi Ice Cream",
-      "Pepperoni Sorbet",
-      "Chocolate Soy",
-      "Hot Pepper Pineapple",
-      "Black Bean Ice Cream",
-      "Jalapeno Cucumber",
-      "Roast Garlic Orange",
-      "Caramel Onion",
-      "Pickled Pineapple",
-      "Mustard Sorbet"
-    ];
-
-    const addIns = [
-      "Chocolate Chips",
-      "Peanut Butter Swirl",
-      "Oreos",
-      "Brownie Chunks",
-      "Fruit Swirl",
-      "Marshmallows",
-      "Nuts",
-      "Coconut Flakes",
-      "Fudge Sauce",
-      "Candy Pieces",
-      "Crushed Graham Crackers",
-      "Caramel Swirl",
-      "White Chocolate Chips",
-      "Rainbow Sprinkles",
-      "Chopped Almonds",
-      "Biscotti Pieces",
-      "Toffee Crunch"
-    ];
-
-    const randomBase =
-      weirdFlavorsList[Math.floor(Math.random() * weirdFlavorsList.length)];
-    const randomAddIn = addIns[Math.floor(Math.random() * addIns.length)];
-
-    const weirdFlavor = `${randomBase} with ${randomAddIn}`;
-
-    // Check if flavor already exists before adding it
-    if (!weirdFlavors.includes(weirdFlavor)) {
-      weirdFlavors.unshift(weirdFlavor); // Add the new flavor at the top
-      updateWeirdFlavorList();
-    }
-  });
-
-// Update Normal Flavor List
-function updateNormalFlavorList() {
-  const flavorList = document.getElementById("normalFlavorList");
-  flavorList.innerHTML = "";
-  normalFlavors.forEach((flavor) => {
-    const listItem = document.createElement("li");
-    listItem.textContent = flavor;
-
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
-    deleteButton.classList.add("deleteButton");
-    deleteButton.style.backgroundColor = "red"; // Red for delete
-    deleteButton.addEventListener("click", function () {
-      deletedNormalFlavors.push(flavor);
-      normalFlavors = normalFlavors.filter((item) => item !== flavor);
-      updateNormalFlavorList();
-      updateDeletedNormalFlavorsList();
-    });
-
-    listItem.appendChild(deleteButton);
-    flavorList.appendChild(listItem);
-  });
-}
-
-// Update Weird Flavor List
-function updateWeirdFlavorList() {
-  const weirdFlavorList = document.getElementById("weirdFlavorList");
-  weirdFlavorList.innerHTML = "";
-  weirdFlavors.forEach((flavor) => {
-    const listItem = document.createElement("li");
-    listItem.textContent = flavor;
-
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
-    deleteButton.classList.add("deleteButton");
-    deleteButton.style.backgroundColor = "red"; // Red for delete
-    deleteButton.addEventListener("click", function () {
-      deletedWeirdFlavors.push(flavor);
-      weirdFlavors = weirdFlavors.filter((item) => item !== flavor);
-      updateWeirdFlavorList();
-      updateDeletedWeirdFlavorsList();
-    });
-
-    listItem.appendChild(deleteButton);
-    weirdFlavorList.appendChild(listItem);
-  });
-}
-
-// Update Deleted Normal Flavors List
-function updateDeletedNormalFlavorsList() {
-  const deletedNormalFlavorsList = document.getElementById(
-    "deletedNormalFlavorsList"
-  );
-  deletedNormalFlavorsList.innerHTML = "";
-  deletedNormalFlavors.forEach((flavor) => {
-    const listItem = document.createElement("li");
-    listItem.textContent = flavor;
-
-    const restoreButton = document.createElement("button");
-    restoreButton.textContent = "Restore";
-    restoreButton.classList.add("restoreButton");
-    restoreButton.style.backgroundColor = "green"; // Green for restore
-    restoreButton.addEventListener("click", function () {
-      deletedNormalFlavors = deletedNormalFlavors.filter(
-        (item) => item !== flavor
-      );
-      normalFlavors.push(flavor);
-      updateDeletedNormalFlavorsList();
-      updateNormalFlavorList();
-    });
-
-    listItem.appendChild(restoreButton);
-    deletedNormalFlavorsList.appendChild(listItem);
-  });
-}
-
-// Update Deleted Weird Flavors List
-function updateDeletedWeirdFlavorsList() {
-  const deletedWeirdFlavorsList = document.getElementById(
-    "deletedWeirdFlavorsList"
-  );
-  deletedWeirdFlavorsList.innerHTML = "";
-  deletedWeirdFlavors.forEach((flavor) => {
-    const listItem = document.createElement("li");
-    listItem.textContent = flavor;
-
-    const restoreButton = document.createElement("button");
-    restoreButton.textContent = "Restore";
-    restoreButton.classList.add("restoreButton");
-    restoreButton.style.backgroundColor = "green"; // Green for restore
-    restoreButton.addEventListener("click", function () {
-      deletedWeirdFlavors = deletedWeirdFlavors.filter(
-        (item) => item !== flavor
-      );
-      weirdFlavors.push(flavor);
-      updateDeletedWeirdFlavorsList();
-      updateWeirdFlavorList();
-    });
-
-    listItem.appendChild(restoreButton);
-    deletedWeirdFlavorsList.appendChild(listItem);
-  });
-}
-
-// Clear Generated Flavors (Only for Active Tab)
-document
-  .getElementById("clearGeneratedButton")
-  .addEventListener("click", function () {
-    const confirmation = confirm(
-      "Are you sure you want to clear all generated flavors for this tab?"
-    );
-    if (confirmation) {
-      if (document.getElementById("normalTab").classList.contains("active")) {
-        normalFlavors = [];
-        updateNormalFlavorList();
-      } else if (
-        document.getElementById("weirdTab").classList.contains("active")
-      ) {
-        weirdFlavors = [];
-        updateWeirdFlavorList();
-      }
-    }
-  });
-
-// Clear Deleted Flavors (Only for Active Tab)
-document
-  .getElementById("clearDeletedButton")
-  .addEventListener("click", function () {
-    const confirmation = confirm(
-      "Are you sure you want to clear all deleted flavors for this tab?"
-    );
-    if (confirmation) {
-      if (document.getElementById("normalTab").classList.contains("active")) {
-        deletedNormalFlavors = [];
-        updateDeletedNormalFlavorsList();
-      } else if (
-        document.getElementById("weirdTab").classList.contains("active")
-      ) {
-        deletedWeirdFlavors = [];
-        updateDeletedWeirdFlavorsList();
-      }
-    }
-  });
-
-// Clear All Lists (Generated and Deleted Flavors) with Confirmation for Active Tab
-document
-  .getElementById("clearAllButton")
-  .addEventListener("click", function () {
-    const confirmation = confirm(
-      "Are you sure you want to clear all lists for this tab?"
-    );
-    if (confirmation) {
-      if (document.getElementById("normalTab").classList.contains("active")) {
-        normalFlavors = [];
-        deletedNormalFlavors = [];
-        updateNormalFlavorList();
-        updateDeletedNormalFlavorsList();
-      } else if (
-        document.getElementById("weirdTab").classList.contains("active")
-      ) {
-        weirdFlavors = [];
-        deletedWeirdFlavors = [];
-        updateWeirdFlavorList();
-        updateDeletedWeirdFlavorsList();
-      }
-    }
-  });
-
-// Sorting Alphabetically for Active Tab Only
-document.getElementById("sortButton").addEventListener("click", function () {
-  if (document.getElementById("normalTab").classList.contains("active")) {
-    normalFlavors.sort();
-    updateNormalFlavorList();
-  } else if (document.getElementById("weirdTab").classList.contains("active")) {
-    weirdFlavors.sort();
-    updateWeirdFlavorList();
-  }
-});
-
-// Download List with Custom File Name
-document
-  .getElementById("downloadButton")
-  .addEventListener("click", function () {
-    const fileName =
-      document.getElementById("fileNameInput").value || "flavor_list";
-    let listContent = "";
-
-    if (document.getElementById("normalTab").classList.contains("active")) {
-      listContent += "Normal Flavors:\n" + normalFlavors.join("\n") + "\n\n";
-    } else if (
-      document.getElementById("weirdTab").classList.contains("active")
-    ) {
-      listContent += "Weird Flavors:\n" + weirdFlavors.join("\n") + "\n\n";
-    }
-
-    const blob = new Blob([listContent], { type: "text/plain" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `${fileName}.txt`;
-    link.click();
-  });
-
-// Trigger Download when Enter Key is Pressed on "File Name" Input Field
-document
-  .getElementById("fileNameInput")
-  .addEventListener("keydown", function (event) {
-    if (event.key === "Enter") {
-      const fileName =
-        document.getElementById("fileNameInput").value || "flavor_list";
-      let listContent = "";
-
-      if (document.getElementById("normalTab").classList.contains("active")) {
-        listContent += "Normal Flavors:\n" + normalFlavors.join("\n") + "\n\n";
-      } else if (
-        document.getElementById("weirdTab").classList.contains("active")
-      ) {
-        listContent += "Weird Flavors:\n" + weirdFlavors.join("\n") + "\n\n";
-      }
-
-      const blob = new Blob([listContent], { type: "text/plain" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `${fileName}.txt`;
-      link.click();
-    }
-  });
+// Auto-update time ago every minute
+setInterval(() => {
+  updateUI();
+}, 60000);
