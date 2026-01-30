@@ -47,7 +47,12 @@ const sweetFlavors = [
   "Chocolate Chip Cookie", "Coconut Cream Pie", "Toasted Almond", "Maple Walnut",
   "Chocolate Mint", "Peach Melba", "Chocolate Fudge Swirl", "Apple Pie",
   "Carrot Cake", "Chocolate Brownie", "Cookie Butter", "Maple Bacon",
-  "White Chocolate Raspberry", "Red Velvet", "Churros", "Lemon Curd"
+  "White Chocolate Raspberry", "Red Velvet", "Churros", "Lemon Curd", "Ube", "Earl Grey", "Thai Tea", "Horchata", "Dulce de Leche",
+"Honeycomb", "Black Sesame", "Banana Foster", "Strawberry Shortcake", "Mocha Almond Fudge",
+"Chocolate Hazelnut", "Pralines & Cream", "Key Lime Pie", "Passion Fruit", "Guava Cream",
+"Lychee Rose", "Fig & Mascarpone", "Sweet Corn", "Malted Milk", "Peanut Butter Pretzel",
+"Chocolate Orange", "Biscoff Swirl", "Tahini Honey", "Spiced Chai", "Blackberry Sage",
+"Pineapple Coconut", "Saffron Pistachio", "Espresso Toffee", "Strawberry Balsamic", "Olive Oil & Sea Salt"
 ];
 
 const weirdFlavors = [
@@ -74,7 +79,37 @@ const weirdFlavors = [
   "Candy Pieces", "Crushed Graham Crackers", "Caramel Swirl",
   "White Chocolate Chips", "Rainbow Sprinkles", "Chopped Almonds",
   "Biscotti Pieces", "Toffee Crunch", "Cookie Dough Chunks", "Pretzel Bits",
-  "Honeycomb Crunch", "Raspberry Ribbons", "Salted Caramel Drizzle"
+  "Honeycomb Crunch", "Raspberry Ribbons", "Salted Caramel Drizzle", "Mini Marshmallows", "Crushed Cookies", "Dark Chocolate Chunks", "Milk Chocolate Chips",
+"White Chocolate Drizzle", "Butterscotch Chips", "Crushed Pretzels",
+"Salted Toffee Bits", "Candied Walnuts", "Candied Pecans",
+"Macadamia Nuts", "Hazelnut Pieces", "Pistachio Crumble",
+"Almond Brittle", "Chocolate-Covered Espresso Beans",
+"Crushed Peanut Brittle", "Caramelized Coconut",
+"Strawberry Compote", "Blueberry Swirl", "Mango Ripple",
+"Lemon Curd Swirl", "Passion Fruit Seeds",
+"Matcha Crumble", "Cinnamon Sugar Crystals",
+"Churro Pieces", "Mini Cheesecake Bites",
+"Rice Crispy Clusters", "Chocolate Truffle Bits",
+"Salted Pretzel Caramel", "Mini M&M’s", "Chocolate Covered Pretzels", "Crushed Kit Kats", "Crushed Twix",
+"Crushed Butterfinger", "Chocolate Wafer Pieces", "Vanilla Wafer Crumbs",
+"Graham Cracker Swirl", "Chocolate Syrup", "Strawberry Syrup",
+"Caramelized Bananas", "Candied Ginger", "Candied Orange Peel",
+"Freeze-Dried Strawberries", "Freeze-Dried Raspberries",
+"Freeze-Dried Mango", "Yogurt Chips", "Dark Chocolate Drizzle",
+"Milk Chocolate Drizzle", "Peanut Brittle", "Cashew Pieces",
+"Sunflower Seeds", "Pumpkin Seeds", "Chia Crunch",
+"Oat Crumble", "Granola Clusters", "Cinnamon Streusel",
+"Brown Sugar Crumble", "Shortbread Cookie Pieces",
+"Ladyfinger Crumbs", "Chocolate Rice Crunch",
+"Vanilla Cake Bites", "Red Velvet Cake Crumbs",
+"Chocolate Cake Crumbs", "Mini Donut Pieces",
+"Cereal Marshmallow Bits", "Cornflake Crunch",
+"Fruity Cereal Crunch", "Caramel Popcorn",
+"Chocolate Popcorn", "Mini Mochi Pieces",
+"Chewy Caramel Cubes", "Soft Toffee Chews",
+"Fruit Jelly Cubes", "Popping Candy",
+"Chocolate Rocks", "Gold Sugar Crystals",
+"Silver Sprinkles", "Confetti Crunch"
 ];
 
 // ==================== Flavor Generation ====================
