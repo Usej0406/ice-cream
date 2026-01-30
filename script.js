@@ -2,6 +2,7 @@
 let flavors = [];
 let currentFilter = 'all';
 let currentCategory = 'sweet';
+let currentSort = 'time-newest'; // Default sort
 
 // ==================== Local Storage ====================
 const STORAGE_KEY = 'scoopsai_flavors';
@@ -34,9 +35,9 @@ function toggleTheme() {
 
 // ==================== Flavor Data ====================
 const sweetFlavors = [
-  "Vanilla", "Chocolate", "Strawberry", "Mint", "Coffee", "Cookie Dough", 
-  "Pistachio", "Caramel", "Cookies and Cream", "Neapolitan", "Raspberry", 
-  "Lemon", "Mango", "Butterscotch", "Rocky Road", "Blackberry", "Peach", 
+  "Vanilla", "Chocolate", "Strawberry", "Mint", "Coffee", "Cookie Dough",
+  "Pistachio", "Caramel", "Cookies and Cream", "Neapolitan", "Raspberry",
+  "Lemon", "Mango", "Butterscotch", "Rocky Road", "Blackberry", "Peach",
   "Maple Pecan", "Cotton Candy", "Tiramisu", "Salted Caramel", "Almond Joy",
   "Toffee Crunch", "Banana Split", "S'mores", "Cherry Garcia", "Pumpkin Spice",
   "Butter Pecan", "Blueberry Cheesecake", "Apple Cinnamon", "Lemon Meringue",
@@ -80,10 +81,10 @@ const weirdFlavors = [
 function generateFlavor(category) {
   const baseList = category === 'sweet' ? sweetFlavors : weirdFlavors;
   const randomBase = baseList[Math.floor(Math.random() * baseList.length)];
-  const randomAddIn = addIns[Math.floor(Math.random() * addIns.length)];
-  
+    const randomAddIn = addIns[Math.floor(Math.random() * addIns.length)];
+
   const flavorName = `${randomBase} ${randomAddIn}`;
-  
+
   const flavor = {
     id: Date.now() + Math.random(),
     name: flavorName,
@@ -92,15 +93,15 @@ function generateFlavor(category) {
     timestamp: new Date().toISOString(),
     colorClass: category === 'sweet' ? `color-${Math.floor(Math.random() * 10) + 1}` : ''
   };
-  
+
   flavors.unshift(flavor);
   saveFlavors();
   updateUI();
   updateHeroTitle(flavorName, category);
-  
+
   // Animate the hero title
   animateHeroTitle();
-  
+
   // Create confetti effect
   createConfetti();
 }
@@ -108,15 +109,15 @@ function generateFlavor(category) {
 function updateHeroTitle(title, category = 'sweet') {
   const heroTitle = document.getElementById('currentFlavor');
   const heroBadge = document.querySelector('.hero-badge');
-  
+
   heroTitle.style.opacity = '0';
   heroTitle.style.transform = 'translateY(20px)';
-  
+
   setTimeout(() => {
     heroTitle.textContent = title;
     heroTitle.style.opacity = '1';
     heroTitle.style.transform = 'translateY(0)';
-    
+
     // Update badge text based on category
     if (category === 'weird') {
       heroBadge.textContent = '⚠️ WARNING: WEIRD FLAVOR';
@@ -145,7 +146,7 @@ function toggleFavorite(id) {
     flavor.isFavorite = !flavor.isFavorite;
     saveFlavors();
     updateUI();
-    
+
     // Create floating heart animation if favorited
     if (flavor.isFavorite) {
       const favoriteBtn = document.querySelector(`[data-id="${id}"] .favorite-btn`);
@@ -159,7 +160,7 @@ function toggleFavorite(id) {
 function createFloatingHearts(element) {
   const rect = element.getBoundingClientRect();
   const container = document.getElementById('heartsContainer');
-  
+
   // Create 5 floating hearts
   for (let i = 0; i < 5; i++) {
     setTimeout(() => {
@@ -169,7 +170,7 @@ function createFloatingHearts(element) {
       heart.style.left = `${rect.left + rect.width / 2 + (Math.random() - 0.5) * 40}px`;
       heart.style.top = `${rect.top + rect.height / 2}px`;
       container.appendChild(heart);
-      
+
       setTimeout(() => {
         heart.remove();
       }, 2000);
@@ -191,48 +192,111 @@ function setFilter(filter) {
 }
 
 function filterFlavors() {
+  let filtered = [];
+  
   if (currentFilter === 'all') {
-    return flavors;
+    filtered = [...flavors];
   } else if (currentFilter === 'favorites') {
-    return flavors.filter(f => f.isFavorite);
+    filtered = flavors.filter(f => f.isFavorite);
   } else if (currentFilter === 'sweet') {
-    return flavors.filter(f => f.category === 'sweet');
+    filtered = flavors.filter(f => f.category === 'sweet');
   } else if (currentFilter === 'weird') {
-    return flavors.filter(f => f.category === 'weird');
+    filtered = flavors.filter(f => f.category === 'weird');
   } else if (currentFilter === 'safe') {
-    return flavors.filter(f => f.category === 'sweet');
+    filtered = flavors.filter(f => f.category === 'sweet');
+  } else {
+    filtered = [...flavors];
   }
-  return flavors;
+  
+  // Apply sorting
+  return sortFlavors(filtered);
 }
+
+// ==================== Sort Management ====================
+function setSort(sort) {
+  currentSort = sort;
+  updateUI();
+  
+  // Update active state in sort menu
+  document.querySelectorAll('.sort-option').forEach(option => {
+    option.classList.toggle('active', option.dataset.sort === sort);
+  });
+}
+
+function sortFlavors(flavorList) {
+  const sorted = [...flavorList];
+  
+  switch(currentSort) {
+    case 'name-asc':
+      return sorted.sort((a, b) => a.name.localeCompare(b.name));
+    
+    case 'name-desc':
+      return sorted.sort((a, b) => b.name.localeCompare(a.name));
+    
+    case 'time-newest':
+      return sorted.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    case 'time-oldest':
+      return sorted.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    
+    default:
+      return sorted;
+  }
+}
+
+function toggleSortMenu() {
+  const sortMenu = document.getElementById('sortMenu');
+  const sortButton = document.getElementById('sortButton');
+  const isActive = sortMenu.classList.toggle('active');
+  
+  // Toggle button active state
+  if (isActive) {
+    sortButton.classList.add('active');
+  } else {
+    sortButton.classList.remove('active');
+  }
+}
+
+// Close sort menu when clicking outside
+document.addEventListener('click', function(event) {
+  const sortDropdown = document.querySelector('.sort-dropdown');
+  const sortMenu = document.getElementById('sortMenu');
+  const sortButton = document.getElementById('sortButton');
+  
+  if (sortDropdown && !sortDropdown.contains(event.target)) {
+    sortMenu.classList.remove('active');
+    sortButton.classList.remove('active');
+  }
+});
 
 // ==================== UI Rendering ====================
 function updateUI() {
   const flavorGrid = document.getElementById('flavorGrid');
   const emptyState = document.getElementById('emptyState');
   const historyCount = document.getElementById('historyCount');
-  
+
   const filteredFlavors = filterFlavors();
-  
+
   // Update count
   historyCount.textContent = filteredFlavors.length;
-  
+
   // Clear grid
   flavorGrid.innerHTML = '';
-  
+
   // Show empty state if no flavors
   if (filteredFlavors.length === 0) {
     emptyState.classList.remove('hidden');
     return;
   }
-  
+
   emptyState.classList.add('hidden');
-  
+
   // Render flavor cards
   filteredFlavors.forEach(flavor => {
     const card = createFlavorCard(flavor);
     flavorGrid.appendChild(card);
   });
-  
+
   // Update filter buttons
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.filter === currentFilter);
@@ -243,12 +307,12 @@ function createFlavorCard(flavor) {
   const card = document.createElement('div');
   card.className = 'flavor-card';
   card.dataset.id = flavor.id;
-  
+
   const timeAgo = getTimeAgo(flavor.timestamp);
-  
+
   // Determine the color class for the flavor name
   const colorClass = flavor.category === 'sweet' ? flavor.colorClass : 'weird';
-  
+
   card.innerHTML = `
     <div class="flavor-card-header">
       <div class="flavor-badge ${flavor.category}">
@@ -282,7 +346,7 @@ function createFlavorCard(flavor) {
       </button>
     </div>
   `;
-  
+
   return card;
 }
 
@@ -291,7 +355,7 @@ function getTimeAgo(timestamp) {
   const now = new Date();
   const past = new Date(timestamp);
   const seconds = Math.floor((now - past) / 1000);
-  
+
   if (seconds < 60) return `${seconds}s`;
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
   if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
@@ -304,14 +368,14 @@ function downloadHistory() {
     alert('No flavors to download!');
     return;
   }
-  
+
   let content = '🍦 Ice Cream Flavor History\n';
   content += '=====================================\n\n';
-  
+
   const sweetFlavors = flavors.filter(f => f.category === 'sweet');
   const weirdFlavors = flavors.filter(f => f.category === 'weird');
   const favorites = flavors.filter(f => f.isFavorite);
-  
+
   if (favorites.length > 0) {
     content += '❤️ FAVORITES:\n';
     favorites.forEach(f => {
@@ -319,7 +383,7 @@ function downloadHistory() {
     });
     content += '\n';
   }
-  
+
   if (sweetFlavors.length > 0) {
     content += '🍨 SWEET & SAFE:\n';
     sweetFlavors.forEach(f => {
@@ -328,7 +392,7 @@ function downloadHistory() {
     });
     content += '\n';
   }
-  
+
   if (weirdFlavors.length > 0) {
     content += '🤪 WEIRD & WILD:\n';
     weirdFlavors.forEach(f => {
@@ -337,10 +401,10 @@ function downloadHistory() {
     });
     content += '\n';
   }
-  
+
   content += `\nGenerated: ${new Date().toLocaleString()}\n`;
   content += 'Total Flavors: ' + flavors.length + '\n';
-  
+
   const blob = new Blob([content], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -356,7 +420,7 @@ function clearHistory() {
     alert('No flavors to clear!');
     return;
   }
-  
+
   if (confirm('Are you sure you want to clear all flavor history? This cannot be undone.')) {
     flavors = [];
     saveFlavors();
@@ -369,7 +433,7 @@ function clearHistory() {
 function createConfetti() {
   const colors = ['#10d97f', '#ff6b9d', '#b847d9', '#47d9ff', '#ff9f47', '#9b7ee6'];
   const shapes = ['star', 'circle', 'line'];
-  
+
   for (let i = 0; i < 30; i++) {
     setTimeout(() => {
       const confetti = document.createElement('div');
@@ -379,9 +443,9 @@ function createConfetti() {
       confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
       confetti.style.animationDelay = `${Math.random() * 0.5}s`;
       confetti.style.animationDuration = `${2 + Math.random() * 2}s`;
-      
+
       document.body.appendChild(confetti);
-      
+
       setTimeout(() => {
         confetti.remove();
       }, 4000);
@@ -392,41 +456,56 @@ function createConfetti() {
 // ==================== Info Modal ====================
 function showInfo() {
   alert('🍦 AI Ice Cream Generator\n\n' +
-        'Generate creative ice cream flavors!\n\n' +
-        '🍨 Sweet & Safe: Classic delicious flavors\n' +
-        '🤪 Weird & Wild: Adventurous combinations\n\n' +
-        '❤️ Click the heart to favorite flavors\n' +
-        '🗑️ Click the trash to delete flavors\n\n' +
-        'Made with ❤️');
+    'Generate creative ice cream flavors!\n\n' +
+    '🍨 Sweet & Safe: Classic delicious flavors\n' +
+    '🤪 Weird & Wild: Adventurous combinations\n\n' +
+    '❤️ Click the heart to favorite flavors\n' +
+    '🗑️ Click the trash to delete flavors\n\n' +
+    'Made with ❤️');
 }
 
 // ==================== Event Listeners ====================
 function initEventListeners() {
   // Theme toggle
   document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-  
+
   // Info button
   document.getElementById('infoButton').addEventListener('click', showInfo);
-  
+
   // Category buttons
   document.querySelectorAll('.category-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const category = btn.dataset.category;
       currentCategory = category;
-      
+
       // Update active state
       document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      
+
       // Generate flavor
       generateFlavor(category);
     });
   });
-  
+
   // Filter buttons
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       setFilter(btn.dataset.filter);
+    });
+  });
+  
+  // Sort button
+  document.getElementById('sortButton').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleSortMenu();
+  });
+  
+  // Sort options
+  document.querySelectorAll('.sort-option').forEach(option => {
+    option.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setSort(option.dataset.sort);
+      toggleSortMenu();
     });
   });
   
@@ -442,6 +521,11 @@ function init() {
   initTheme();
   loadFlavors();
   initEventListeners();
+  
+  // Set default active sort option
+  document.querySelectorAll('.sort-option').forEach(option => {
+    option.classList.toggle('active', option.dataset.sort === currentSort);
+  });
   
   // If no flavors, show default title
   if (flavors.length === 0) {

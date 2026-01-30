@@ -98,6 +98,42 @@
           </div>
 
           <div class="history-actions">
+            <div class="sort-dropdown">
+              <button class="icon-button" id="sortButton" aria-label="Sort flavors">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="4" y1="6" x2="16" y2="6"/>
+                  <line x1="4" y1="12" x2="13" y2="12"/>
+                  <line x1="4" y1="18" x2="10" y2="18"/>
+                  <polygon points="15 17 20 22 20 2 15 7"/>
+                </svg>
+              </button>
+              <div class="sort-menu" id="sortMenu">
+                <div class="sort-option" data-sort="name-asc">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                  Name (A-Z)
+                </div>
+                <div class="sort-option" data-sort="name-desc">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="18 15 12 9 6 15"/>
+                  </svg>
+                  Name (Z-A)
+                </div>
+                <div class="sort-option" data-sort="time-newest">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                  Newest First
+                </div>
+                <div class="sort-option" data-sort="time-oldest">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="18 15 12 9 6 15"/>
+                  </svg>
+                  Oldest First
+                </div>
+              </div>
+            </div>
             <button class="icon-button" id="downloadHistory" aria-label="Download history">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>

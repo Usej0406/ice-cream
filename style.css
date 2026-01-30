@@ -475,6 +475,81 @@ body {
 .history-actions {
   display: flex;
   gap: 12px;
+  align-items: center;
+}
+
+/* ==================== Sort Dropdown ==================== */
+.sort-dropdown {
+  position: relative;
+}
+
+.sort-dropdown .icon-button.active {
+  background-color: var(--accent-green);
+  color: white;
+  border-color: var(--accent-green);
+  transform: translateY(-3px) rotate(0deg);
+}
+
+.sort-dropdown .icon-button.active:hover {
+  background-color: #0bc46b;
+}
+
+.sort-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background-color: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  padding: 8px;
+  min-width: 180px;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sort-menu.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.sort-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.sort-option:hover {
+  background-color: var(--bg-card-hover);
+  color: var(--accent-green);
+  transform: translateX(4px);
+}
+
+.sort-option.active {
+  background-color: var(--accent-green);
+  color: white;
+}
+
+.sort-option.active:hover {
+  background-color: #0bc46b;
+}
+
+.sort-option svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
 }
 
 /* ==================== Flavor Grid ==================== */
