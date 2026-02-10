@@ -20,10 +20,11 @@
 <body>
   <div class="app-container">
     <!-- Header -->
-    <header class="header">
-      <div class="logo">
-        <span class="logo-text">Quirkside<span class="logo-ai"></span></span>
-      </div>
+      <header class="header">
+        <div class="logo">
+          <div class="logo-icon">Q</div>
+          <span class="logo-text">Quirkside</span>
+        </div>
       <div class="header-actions">
         <button class="icon-button" id="infoButton" aria-label="Information">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -53,37 +54,43 @@
 
     <!-- Main Content -->
     <main class="main-content">
-      <!-- Hero Section -->
-      <section class="hero">
-        <h1 class="hero-title" id="currentFlavor">Velvety Chocolate Fruit</h1>
-        <span class="hero-badge">FRESHLY CHURNED</span>
-        
-        <!-- Category Selection -->
-        <div class="category-buttons">
-          <button class="category-btn category-sweet active" data-category="sweet">
-            <svg class="category-icon" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
-            <div>
-              <div class="category-title">Sweet & Safe</div>
-              <div class="category-subtitle">Classic deliciousness</div>
-            </div>
-          </button>
-          
-          <button class="category-btn category-weird" data-category="weird">
-            <svg class="category-icon" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
-            </svg>
-            <div>
-              <div class="category-title">Weird & Wild</div>
-              <div class="category-subtitle">Enter at your own risk</div>
-            </div>
-          </button>
-        </div>
-      </section>
+      <!-- Page Tabs -->
+      <div class="page-tabs">
+        <button class="page-tab active" data-page="history">Our Classics</button>
+        <button class="page-tab" data-page="pantry">Your Creation</button>
+      </div>
 
-      <!-- Flavor History Section -->
-      <section class="history-section">
+      <!-- Our Classics Page -->
+      <div class="page-content active" id="historyPage">
+        <!-- Hero Section -->
+        <section class="hero">
+          <h1 class="hero-title" id="currentFlavor">Velvety Chocolate Fruit</h1>
+          <span class="hero-badge">FRESHLY CHURNED</span>
+          
+          <!-- Category Selection -->
+          <div class="category-buttons">
+            <button class="category-btn category-sweet active" data-category="sweet">
+              <svg class="category-icon" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <div>
+                <div class="category-title">Sweet & Safe</div>
+                <div class="category-subtitle">Classic deliciousness</div>
+              </div>
+            </button>
+            
+            <button class="category-btn category-weird" data-category="weird">
+              <svg class="category-icon" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
+              </svg>
+              <div>
+                <div class="category-title">Weird & Wild</div>
+                <div class="category-subtitle">Enter at your own risk</div>
+              </div>
+            </button>
+          </div>
+        </section>
+
         <div class="history-header">
           <h2 class="history-title">
             Flavor History
@@ -165,6 +172,195 @@
           <p class="empty-subtitle">Click a category above to generate your first ice cream flavor</p>
         </div>
       </section>
+      </div>
+      <!-- End Our Classics Page -->
+
+      <!-- Your Creation Page -->
+      <div class="page-content" id="pantryPage">
+        <!-- Pantry Hero -->
+        <section class="pantry-hero">
+          <h1 class="pantry-title">Ready to Mix?</h1>
+          <p class="pantry-subtitle">Add your ingredients or use our presets.</p>
+        </section>
+
+        <!-- Two Column Layout -->
+        <div class="pantry-layout">
+          <!-- Left: Generate Buttons -->
+          <div class="pantry-left">
+            <div class="generate-section">
+              <button class="category-btn category-sweet" id="mixSweet">
+                <svg class="category-icon" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                <div>
+                  <div class="category-title">Sweet & Safe</div>
+                  <div class="category-subtitle">Classic deliciousness</div>
+                </div>
+              </button>
+              
+              <button class="category-btn category-weird" id="mixWeird">
+                <svg class="category-icon" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
+                </svg>
+                <div>
+                  <div class="category-title">Weird & Wild</div>
+                  <div class="category-subtitle">Enter at your own risk</div>
+                </div>
+              </button>
+            </div>
+
+            <!-- Result Display -->
+            <div class="mix-result" id="mixResult">
+              <h2 class="mix-result-title" id="mixResultTitle">Your Custom Mix</h2>
+              <div class="mix-result-ingredients" id="mixResultIngredients"></div>
+            </div>
+          </div>
+
+          <!-- Right: Flavor Pantry -->
+          <div class="pantry-right">
+            <div class="pantry-card">
+              
+
+              <!-- Add Flavor Input -->
+              <div class="add-flavor-section">
+                <div class="flavor-input-row">
+                  <input 
+                    type="text" 
+                    id="flavorInput" 
+                    class="flavor-input" 
+                    placeholder="Add a new flavor (e.g., Hot Sauce, Bacon, Cookie Dough...)"
+                  />
+                  <button class="add-flavor-btn" id="addFlavorBtn">+</button>
+                </div>
+                <div class="pantry-header">
+                  <div class="pantry-count" id="ingredientCount">0 ingredients loaded</div>
+                </div>
+              </div>
+
+              <!-- Category Tabs -->
+              <div class="flavor-categories">
+                <div class="category-tab active" data-cat="basics">
+                  <span class="category-tab-label">BASICS</span>
+                  <button class="clear-category-btn" data-cat="basics" title="Clear all basics">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="category-tab" data-cat="normal">
+                  <span class="category-tab-label">NORMAL</span>
+                  <button class="clear-category-btn" data-cat="normal" title="Clear all normal">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="category-tab" data-cat="weirdos">
+                  <span class="category-tab-label">WEIRDOS</span>
+                  <button class="clear-category-btn" data-cat="weirdos" title="Clear all weirdos">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Flavor Lists -->
+              <div class="flavor-lists">
+                <div class="flavor-list active" id="basicsList"></div>
+                <div class="flavor-list" id="normalList"></div>
+                <div class="flavor-list" id="weirdosList"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom Flavor History Section -->
+        <section class="history-section">
+          <div class="history-header">
+            <h2 class="history-title">
+              Your Mixes
+              <span class="history-count" id="customHistoryCount">0</span>
+            </h2>
+            
+            <div class="history-filters">
+              <button class="filter-btn active" data-filter="all">All</button>
+              <button class="filter-btn" data-filter="favorites">Favorites</button>
+            </div>
+
+            <div class="history-actions">
+              <div class="sort-dropdown">
+                <button class="icon-button" id="customSortButton" aria-label="Sort flavors">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="4" y1="6" x2="16" y2="6"/>
+                    <line x1="4" y1="12" x2="13" y2="12"/>
+                    <line x1="4" y1="18" x2="10" y2="18"/>
+                    <polygon points="15 17 20 22 20 2 15 7"/>
+                  </svg>
+                </button>
+                <div class="sort-menu" id="customSortMenu">
+                  <div class="sort-option" data-sort="name-asc">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                    Name (A-Z)
+                  </div>
+                  <div class="sort-option" data-sort="name-desc">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="18 15 12 9 6 15"/>
+                    </svg>
+                    Name (Z-A)
+                  </div>
+                  <div class="sort-option" data-sort="time-newest">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                    Newest First
+                  </div>
+                  <div class="sort-option" data-sort="time-oldest">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="18 15 12 9 6 15"/>
+                    </svg>
+                    Oldest First
+                  </div>
+                </div>
+              </div>
+              <button class="icon-button" id="downloadCustomHistory" aria-label="Download history">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+              </button>
+              <button class="icon-button" id="clearCustomHistory" aria-label="Clear history">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Custom Flavor Cards Grid -->
+          <div class="flavor-grid" id="customFlavorGrid">
+            <!-- Custom flavor cards will be inserted here dynamically -->
+          </div>
+
+          <div class="empty-state" id="customEmptyState">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+            <p>No custom mixes yet!</p>
+            <p class="empty-subtitle">Mix your ingredients to create custom flavors</p>
+          </div>
+        </section>
+      </div>
+      <!-- End Your Creation Page -->
     </main>
 
     <!-- Footer Attribution -->

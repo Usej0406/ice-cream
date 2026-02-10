@@ -1,11 +1,24 @@
 // ==================== State Management ====================
 let flavors = [];
+let customFlavors = []; // Custom mixed flavors
 let currentFilter = 'all';
 let currentCategory = 'sweet';
 let currentSort = 'time-newest'; // Default sort
+let currentPage = 'history'; // Current page view (default to Our Classics)
+let selectedCategory = 'basics'; // For adding flavors
+let customFilter = 'all'; // Filter for custom flavors
+let customSort = 'time-newest'; // Sort for custom flavors
+
+// Flavor Pantry Ingredients
+let ingredients = {
+  basics: ['Vanilla Bean', 'Chocolate'],
+  normal: ['Cookie Dough', 'Strawberry'],
+  weirdos: ['Ketchup', 'Pickle Juice', 'Wasabi', 'Garlic']
+};
 
 // ==================== Local Storage ====================
 const STORAGE_KEY = 'scoopsai_flavors';
+const CUSTOM_STORAGE_KEY = 'quirkside_custom_flavors';
 const THEME_KEY = 'scoopsai_theme';
 
 function saveFlavors() {
@@ -17,6 +30,18 @@ function loadFlavors() {
   if (saved) {
     flavors = JSON.parse(saved);
     updateUI();
+  }
+}
+
+function saveCustomFlavors() {
+  localStorage.setItem(CUSTOM_STORAGE_KEY, JSON.stringify(customFlavors));
+}
+
+function loadCustomFlavors() {
+  const saved = localStorage.getItem(CUSTOM_STORAGE_KEY);
+  if (saved) {
+    customFlavors = JSON.parse(saved);
+    updateCustomUI();
   }
 }
 
@@ -259,13 +284,23 @@ function toggleSortMenu() {
 
 // Close sort menu when clicking outside
 document.addEventListener('click', function(event) {
-  const sortDropdown = document.querySelector('.sort-dropdown');
+  const sortDropdown = document.querySelector('#historyPage .sort-dropdown');
   const sortMenu = document.getElementById('sortMenu');
   const sortButton = document.getElementById('sortButton');
   
   if (sortDropdown && !sortDropdown.contains(event.target)) {
     sortMenu.classList.remove('active');
     sortButton.classList.remove('active');
+  }
+  
+  // Close custom sort menu
+  const customSortDropdown = document.querySelector('#pantryPage .sort-dropdown');
+  const customSortMenu = document.getElementById('customSortMenu');
+  const customSortButton = document.getElementById('customSortButton');
+  
+  if (customSortDropdown && !customSortDropdown.contains(event.target)) {
+    customSortMenu.classList.remove('active');
+    customSortButton.classList.remove('active');
   }
 });
 
@@ -453,40 +488,571 @@ function createConfetti() {
   }
 }
 
+// ==================== Page Navigation ====================
+function switchPage(page) {
+  currentPage = page;
+  
+  // Update page content
+  document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+  document.getElementById(page === 'pantry' ? 'pantryPage' : 'historyPage').classList.add('active');
+  
+  // Update tab buttons
+  document.querySelectorAll('.page-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.page === page);
+  });
+}
+
+// ==================== Flavor Pantry Management ====================
+function updateIngredientCount() {
+  const total = ingredients.basics.length + ingredients.normal.length + ingredients.weirdos.length;
+  document.getElementById('ingredientCount').textContent = `${total} ingredients loaded`;
+}
+
+function renderFlavorList(category) {
+  const listId = category === 'basics' ? 'basicsList' : 
+                 category === 'normal' ? 'normalList' : 'weirdosList';
+  const list = document.getElementById(listId);
+  
+  list.innerHTML = '';
+  ingredients[category].forEach((flavor, index) => {
+    const pill = document.createElement('div');
+    pill.className = 'flavor-pill';
+    pill.innerHTML = `
+      ${flavor}
+      <button class="remove-flavor-btn" onclick="removeFlavor('${category}', ${index})" aria-label="Remove">×</button>
+    `;
+    list.appendChild(pill);
+  });
+}
+
+function renderAllFlavorLists() {
+  renderFlavorList('basics');
+  renderFlavorList('normal');
+  renderFlavorList('weirdos');
+  updateIngredientCount();
+}
+
+function addFlavor(category, flavorText) {
+  if (!flavorText || flavorText.trim() === '') return;
+  
+  // Split by comma and trim each flavor
+  const flavors = flavorText.split(',').map(f => f.trim()).filter(f => f !== '');
+  
+  flavors.forEach(flavor => {
+    if (!ingredients[category].includes(flavor)) {
+      ingredients[category].push(flavor);
+    }
+  });
+  
+  renderFlavorList(category);
+  updateIngredientCount();
+  saveIngredients();
+}
+
+function removeFlavor(category, index) {
+  ingredients[category].splice(index, 1);
+  renderFlavorList(category);
+  updateIngredientCount();
+  saveIngredients();
+}
+
+function clearCategory(category) {
+  if (ingredients[category].length === 0) return;
+  
+  const categoryNames = {
+    basics: 'Basics',
+    normal: 'Normal',
+    weirdos: 'Weirdos'
+  };
+  
+  const confirmMessage = `Are you sure you want to remove all ${ingredients[category].length} flavors from ${categoryNames[category]}?`;
+  
+  if (confirm(confirmMessage)) {
+    ingredients[category] = [];
+    renderFlavorList(category);
+    updateIngredientCount();
+    saveIngredients();
+  }
+}
+
+function switchFlavorCategory(category) {
+  selectedCategory = category;
+  
+  // Update category tabs
+  document.querySelectorAll('.category-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.cat === category);
+  });
+  
+  // Update emoji buttons
+  document.querySelectorAll('.emoji-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.category === category);
+  });
+  
+  // Update flavor lists
+  document.querySelectorAll('.flavor-list').forEach(list => {
+    list.classList.remove('active');
+  });
+  
+  const listId = category === 'basics' ? 'basicsList' : 
+                 category === 'normal' ? 'normalList' : 'weirdosList';
+  document.getElementById(listId).classList.add('active');
+}
+
+function mixFlavors(type) {
+  let availableIngredients = [];
+  
+  if (type === 'sweet') {
+    availableIngredients = [...ingredients.basics, ...ingredients.normal];
+  } else {
+    availableIngredients = [...ingredients.weirdos];
+  }
+  
+  if (availableIngredients.length < 2) {
+    alert('Not enough ingredients! Add more flavors to your pantry.');
+    return;
+  }
+  
+  // Randomly select 2-4 ingredients
+  const numIngredients = Math.min(Math.floor(Math.random() * 3) + 2, availableIngredients.length);
+  const selected = [];
+  const usedIndices = new Set();
+  
+  while (selected.length < numIngredients) {
+    const index = Math.floor(Math.random() * availableIngredients.length);
+    if (!usedIndices.has(index)) {
+      selected.push(availableIngredients[index]);
+      usedIndices.add(index);
+    }
+  }
+  
+  displayMixResult(selected, type);
+}
+
+function displayMixResult(ingredients, type) {
+  const resultTitle = document.getElementById('mixResultTitle');
+  const resultIngredients = document.getElementById('mixResultIngredients');
+  
+  const flavorName = ingredients.join(' ');
+  resultTitle.textContent = flavorName;
+  
+  resultIngredients.innerHTML = '';
+  ingredients.forEach(ingredient => {
+    const tag = document.createElement('div');
+    tag.className = 'ingredient-tag';
+    tag.textContent = ingredient;
+    resultIngredients.appendChild(tag);
+  });
+  
+  // Save to custom flavors history
+  const customFlavor = {
+    id: Date.now() + Math.random(),
+    name: flavorName,
+    ingredients: ingredients,
+    category: type,
+    isFavorite: false,
+    timestamp: new Date().toISOString(),
+    colorClass: type === 'sweet' ? `color-${Math.floor(Math.random() * 10) + 1}` : 'weird'
+  };
+  
+  customFlavors.unshift(customFlavor);
+  saveCustomFlavors();
+  updateCustomUI();
+  
+  // Animate result
+  const resultBox = document.querySelector('.mix-result');
+  resultBox.style.animation = 'none';
+  setTimeout(() => {
+    resultBox.style.animation = 'scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+  }, 10);
+  
+  // Create confetti
+  createConfetti();
+}
+
+function saveIngredients() {
+  localStorage.setItem('quirkside_ingredients', JSON.stringify(ingredients));
+}
+
+function loadIngredients() {
+  const saved = localStorage.getItem('quirkside_ingredients');
+  if (saved) {
+    ingredients = JSON.parse(saved);
+  }
+  renderAllFlavorLists();
+}
+
+// ==================== Custom Flavors Management ====================
+function toggleCustomFavorite(id) {
+  const flavor = customFlavors.find(f => f.id === id);
+  if (!flavor) return;
+  
+  flavor.isFavorite = !flavor.isFavorite;
+  saveCustomFlavors();
+  
+  // Update only the button state without re-rendering
+  const card = document.querySelector(`#customFlavorGrid [data-id="${id}"]`);
+  if (card) {
+    const favoriteBtn = card.querySelector('.favorite-btn');
+    const svg = favoriteBtn.querySelector('svg');
+    
+    if (flavor.isFavorite) {
+      favoriteBtn.classList.add('active');
+      svg.setAttribute('fill', 'currentColor');
+      createFloatingHearts(favoriteBtn);
+    } else {
+      favoriteBtn.classList.remove('active');
+      svg.setAttribute('fill', 'none');
+    }
+  }
+  
+  // Update count and handle filter visibility
+  updateCustomHistoryCount();
+  
+  // If favorites filter is active and item is unfavorited, fade it out
+  if (customFilter === 'favorites' && !flavor.isFavorite && card) {
+    card.style.animation = 'fadeOut 0.3s ease';
+    setTimeout(() => {
+      card.remove();
+      updateCustomHistoryCount();
+      checkCustomEmptyState();
+    }, 300);
+  }
+}
+
+function deleteCustomFlavor(id) {
+  const card = document.querySelector(`#customFlavorGrid [data-id="${id}"]`);
+  
+  if (card) {
+    // Animate removal
+    card.style.animation = 'scaleOut 0.3s ease';
+    card.style.pointerEvents = 'none';
+    
+    setTimeout(() => {
+      customFlavors = customFlavors.filter(f => f.id !== id);
+      saveCustomFlavors();
+      card.remove();
+      updateCustomHistoryCount();
+      checkCustomEmptyState();
+    }, 300);
+  } else {
+    customFlavors = customFlavors.filter(f => f.id !== id);
+    saveCustomFlavors();
+    updateCustomUI();
+  }
+}
+
+function updateCustomHistoryCount() {
+  const customHistoryCount = document.getElementById('customHistoryCount');
+  const filteredCount = filterCustomFlavors().length;
+  customHistoryCount.textContent = filteredCount;
+}
+
+function checkCustomEmptyState() {
+  const customFlavorGrid = document.getElementById('customFlavorGrid');
+  const customEmptyState = document.getElementById('customEmptyState');
+  const hasCards = customFlavorGrid.children.length > 0;
+  
+  if (hasCards) {
+    customEmptyState.classList.add('hidden');
+  } else {
+    customEmptyState.classList.remove('hidden');
+  }
+}
+
+function setCustomFilter(filter) {
+  customFilter = filter;
+  updateCustomUI();
+}
+
+function setCustomSort(sort) {
+  customSort = sort;
+  updateCustomUI();
+  
+  // Update active state in sort menu
+  document.querySelectorAll('#customSortMenu .sort-option').forEach(option => {
+    option.classList.toggle('active', option.dataset.sort === sort);
+  });
+}
+
+function filterCustomFlavors() {
+  let filtered = [];
+  
+  if (customFilter === 'all') {
+    filtered = [...customFlavors];
+  } else if (customFilter === 'favorites') {
+    filtered = customFlavors.filter(f => f.isFavorite);
+  } else {
+    filtered = [...customFlavors];
+  }
+  
+  // Apply sorting
+  return sortCustomFlavors(filtered);
+}
+
+function sortCustomFlavors(flavorList) {
+  const sorted = [...flavorList];
+  
+  switch(customSort) {
+    case 'name-asc':
+      return sorted.sort((a, b) => a.name.localeCompare(b.name));
+    
+    case 'name-desc':
+      return sorted.sort((a, b) => b.name.localeCompare(a.name));
+    
+    case 'time-newest':
+      return sorted.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    case 'time-oldest':
+      return sorted.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    
+    default:
+      return sorted;
+  }
+}
+
+function updateCustomUI() {
+  const customFlavorGrid = document.getElementById('customFlavorGrid');
+  const customEmptyState = document.getElementById('customEmptyState');
+  const customHistoryCount = document.getElementById('customHistoryCount');
+  
+  const filteredFlavors = filterCustomFlavors();
+  
+  // Update count
+  customHistoryCount.textContent = filteredFlavors.length;
+  
+  // Clear grid
+  customFlavorGrid.innerHTML = '';
+  
+  // Show empty state if no flavors
+  if (filteredFlavors.length === 0) {
+    customEmptyState.classList.remove('hidden');
+    return;
+  }
+  
+  customEmptyState.classList.add('hidden');
+  
+  // Render flavor cards
+  filteredFlavors.forEach(flavor => {
+    const card = createCustomFlavorCard(flavor);
+    customFlavorGrid.appendChild(card);
+  });
+  
+  // Update filter buttons
+  document.querySelectorAll('#pantryPage .filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === customFilter);
+  });
+}
+
+function createCustomFlavorCard(flavor) {
+  const card = document.createElement('div');
+  card.className = 'flavor-card';
+  card.dataset.id = flavor.id;
+  
+  const timeAgo = getTimeAgo(flavor.timestamp);
+  const badgeClass = flavor.category === 'sweet' ? 'sweet' : 'weird';
+  const badgeText = flavor.category === 'sweet' ? 'SWEET' : 'WEIRD';
+  const nameColorClass = flavor.colorClass || (flavor.category === 'sweet' ? `color-${Math.floor(Math.random() * 10) + 1}` : 'weird');
+  
+  card.innerHTML = `
+    <div class="flavor-card-header">
+      <div class="flavor-badge ${badgeClass}">
+        ${flavor.category === 'sweet' ? `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        ` : `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
+          </svg>
+        `}
+        ${badgeText}
+      </div>
+      <span class="flavor-time">${timeAgo}</span>
+    </div>
+    <div class="flavor-name ${nameColorClass}">${flavor.name}</div>
+    <div class="flavor-card-footer">
+      <button class="favorite-btn ${flavor.isFavorite ? 'active' : ''}" onclick="toggleCustomFavorite(${flavor.id})" aria-label="Toggle favorite">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="${flavor.isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+      </button>
+      <button class="delete-btn" onclick="deleteCustomFlavor(${flavor.id})" aria-label="Delete flavor">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          <line x1="10" y1="11" x2="10" y2="17"/>
+          <line x1="14" y1="11" x2="14" y2="17"/>
+        </svg>
+      </button>
+    </div>
+  `;
+  
+  return card;
+}
+
+function toggleCustomSortMenu() {
+  const sortMenu = document.getElementById('customSortMenu');
+  const sortButton = document.getElementById('customSortButton');
+  const isActive = sortMenu.classList.toggle('active');
+  
+  // Toggle button active state
+  if (isActive) {
+    sortButton.classList.add('active');
+  } else {
+    sortButton.classList.remove('active');
+  }
+}
+
+function downloadCustomHistory() {
+  if (customFlavors.length === 0) {
+    alert('No custom flavors to download!');
+    return;
+  }
+  
+  let content = '🍦 Quirkside - Your Custom Flavor Mixes\n';
+  content += '=====================================\n\n';
+  
+  const favorites = customFlavors.filter(f => f.isFavorite);
+  
+  if (favorites.length > 0) {
+    content += '❤️ FAVORITES:\n';
+    favorites.forEach(f => {
+      content += `  • ${f.name}\n`;
+      content += `    Ingredients: ${f.ingredients.join(', ')}\n\n`;
+    });
+    content += '\n';
+  }
+  
+  content += '🎨 ALL CUSTOM MIXES:\n';
+  customFlavors.forEach(f => {
+    const fav = f.isFavorite ? '❤️ ' : '';
+    content += `  ${fav}• ${f.name}\n`;
+    content += `    Ingredients: ${f.ingredients.join(', ')}\n\n`;
+  });
+  
+  content += `\nGenerated: ${new Date().toLocaleString()}\n`;
+  content += 'Total Custom Mixes: ' + customFlavors.length + '\n';
+  
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `quirkside-custom-mixes-${Date.now()}.txt`;
+    link.click();
+  URL.revokeObjectURL(url);
+}
+
+function clearCustomHistory() {
+  if (customFlavors.length === 0) {
+    alert('No custom flavors to clear!');
+    return;
+  }
+  
+  if (confirm('Are you sure you want to clear all your custom mixes? This cannot be undone.')) {
+    customFlavors = [];
+    saveCustomFlavors();
+    updateCustomUI();
+  }
+}
+
 // ==================== Info Modal ====================
 function showInfo() {
-  alert('🍦 AI Ice Cream Generator\n\n' +
+  alert('🍦 Quirkside - Ice Cream Generator\n\n' +
     'Generate creative ice cream flavors!\n\n' +
     '🍨 Sweet & Safe: Classic delicious flavors\n' +
     '🤪 Weird & Wild: Adventurous combinations\n\n' +
     '❤️ Click the heart to favorite flavors\n' +
     '🗑️ Click the trash to delete flavors\n\n' +
-    'Made with ❤️');
+    'Made with ❤️ by Quirkside');
 }
 
 // ==================== Event Listeners ====================
 function initEventListeners() {
   // Theme toggle
   document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-
+  
   // Info button
   document.getElementById('infoButton').addEventListener('click', showInfo);
-
-  // Category buttons
-  document.querySelectorAll('.category-btn').forEach(btn => {
+  
+  // Page tabs
+  document.querySelectorAll('.page-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      switchPage(tab.dataset.page);
+    });
+  });
+  
+  // Category buttons (History page)
+  document.querySelectorAll('#historyPage .category-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const category = btn.dataset.category;
       currentCategory = category;
-
+      
       // Update active state
-      document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#historyPage .category-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-
+      
       // Generate flavor
       generateFlavor(category);
     });
   });
+  
+  // Mix buttons (Pantry page)
+  document.getElementById('mixSweet').addEventListener('click', () => {
+    mixFlavors('sweet');
+  });
+  
+  document.getElementById('mixWeird').addEventListener('click', () => {
+    mixFlavors('weird');
+  });
+  
+  // Add flavor button
+  document.getElementById('addFlavorBtn').addEventListener('click', () => {
+    const input = document.getElementById('flavorInput');
+    const text = input.value;
+    if (text) {
+      addFlavor(selectedCategory, text);
+      input.value = '';
+      input.focus();
+    }
+  });
+  
+  // Enter key to add flavor
+  document.getElementById('flavorInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      const text = e.target.value;
+      if (text) {
+        addFlavor(selectedCategory, text);
+        e.target.value = '';
+      }
+    }
+  });
 
+  // Emoji buttons (category selection)
+  document.querySelectorAll('.emoji-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      switchFlavorCategory(btn.dataset.category);
+    });
+  });
+  
+  // Category tabs
+  document.querySelectorAll('.category-tab').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      // Don't switch category if clicking the clear button
+      if (e.target.closest('.clear-category-btn')) {
+        return;
+      }
+      switchFlavorCategory(tab.dataset.cat);
+    });
+  });
+  
+  // Clear category buttons
+  document.querySelectorAll('.clear-category-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent tab switching
+      clearCategory(btn.dataset.cat);
+    });
+  });
+  
   // Filter buttons
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -514,18 +1080,56 @@ function initEventListeners() {
   
   // Clear history
   document.getElementById('clearHistory').addEventListener('click', clearHistory);
+  
+  // Custom Flavor Filter buttons
+  document.querySelectorAll('#pantryPage .filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setCustomFilter(btn.dataset.filter);
+    });
+  });
+  
+  // Custom Sort button
+  document.getElementById('customSortButton').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleCustomSortMenu();
+  });
+  
+  // Custom Sort options
+  document.querySelectorAll('#customSortMenu .sort-option').forEach(option => {
+    option.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setCustomSort(option.dataset.sort);
+      toggleCustomSortMenu();
+    });
+  });
+  
+  // Download custom history
+  document.getElementById('downloadCustomHistory').addEventListener('click', downloadCustomHistory);
+  
+  // Clear custom history
+  document.getElementById('clearCustomHistory').addEventListener('click', clearCustomHistory);
 }
 
 // ==================== Initialization ====================
 function init() {
   initTheme();
   loadFlavors();
+  loadCustomFlavors();
+  loadIngredients();
   initEventListeners();
   
-  // Set default active sort option
-  document.querySelectorAll('.sort-option').forEach(option => {
+  // Set default active sort option for history page
+  document.querySelectorAll('#historyPage .sort-option').forEach(option => {
     option.classList.toggle('active', option.dataset.sort === currentSort);
   });
+  
+  // Set default active sort option for custom page
+  document.querySelectorAll('#customSortMenu .sort-option').forEach(option => {
+    option.classList.toggle('active', option.dataset.sort === customSort);
+  });
+  
+  // Initialize pantry page
+  switchFlavorCategory('basics');
   
   // If no flavors, show default title
   if (flavors.length === 0) {
