@@ -202,18 +202,38 @@ function animateHeroTitle() {
 // ==================== Favorites Management ====================
 function toggleFavorite(id) {
   const flavor = flavors.find(f => f.id === id);
-  if (flavor) {
-    flavor.isFavorite = !flavor.isFavorite;
-    saveFlavors();
-    updateUI();
-
-    // Create floating heart animation if favorited
+  if (!flavor) return;
+  
+  flavor.isFavorite = !flavor.isFavorite;
+  saveFlavors();
+  
+  // Update only the button state without re-rendering
+  const card = document.querySelector(`#flavorGrid [data-id="${id}"]`);
+  if (card) {
+    const favoriteBtn = card.querySelector('.favorite-btn');
+    const svg = favoriteBtn.querySelector('svg');
+    
     if (flavor.isFavorite) {
-      const favoriteBtn = document.querySelector(`[data-id="${id}"] .favorite-btn`);
-      if (favoriteBtn) {
-        createFloatingHearts(favoriteBtn);
-      }
+      favoriteBtn.classList.add('active');
+      svg.setAttribute('fill', 'currentColor');
+      createFloatingHearts(favoriteBtn);
+    } else {
+      favoriteBtn.classList.remove('active');
+      svg.setAttribute('fill', 'none');
     }
+  }
+  
+  // Update count and handle filter visibility
+  updateHistoryCount();
+  
+  // If favorites filter is active and item is unfavorited, fade it out
+  if (currentFilter === 'favorites' && !flavor.isFavorite && card) {
+    card.style.animation = 'fadeOut 0.3s ease';
+    setTimeout(() => {
+      card.remove();
+      updateHistoryCount();
+      checkEmptyState();
+    }, 300);
   }
 }
 
@@ -240,9 +260,43 @@ function createFloatingHearts(element) {
 
 // ==================== Delete Flavor ====================
 function deleteFlavor(id) {
-  flavors = flavors.filter(f => f.id !== id);
-  saveFlavors();
-  updateUI();
+  const card = document.querySelector(`#flavorGrid [data-id="${id}"]`);
+  
+  if (card) {
+    // Animate removal
+    card.style.animation = 'scaleOut 0.3s ease';
+    card.style.pointerEvents = 'none';
+    
+    setTimeout(() => {
+      flavors = flavors.filter(f => f.id !== id);
+      saveFlavors();
+      card.remove();
+      updateHistoryCount();
+      checkEmptyState();
+    }, 300);
+  } else {
+    flavors = flavors.filter(f => f.id !== id);
+    saveFlavors();
+    updateUI();
+  }
+}
+
+function updateHistoryCount() {
+  const historyCount = document.getElementById('historyCount');
+  const filteredCount = filterFlavors().length;
+  historyCount.textContent = filteredCount;
+}
+
+function checkEmptyState() {
+  const flavorGrid = document.getElementById('flavorGrid');
+  const emptyState = document.getElementById('emptyState');
+  const hasCards = flavorGrid.children.length > 0;
+  
+  if (hasCards) {
+    emptyState.classList.add('hidden');
+  } else {
+    emptyState.classList.remove('hidden');
+  }
 }
 
 // ==================== Filter Management ====================
