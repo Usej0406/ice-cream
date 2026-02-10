@@ -691,9 +691,11 @@ function mixFlavors(type) {
   let availableIngredients = [];
   
   if (type === 'sweet') {
-    availableIngredients = [...ingredients.basics, ...ingredients.normal];
+    // Sweet & Safe: Combine Normal and Basics
+    availableIngredients = [...ingredients.normal, ...ingredients.basics];
   } else {
-    availableIngredients = [...ingredients.weirdos];
+    // Weird & Wild: Combine Weirdos and Basics
+    availableIngredients = [...ingredients.weirdos, ...ingredients.basics];
   }
   
   if (availableIngredients.length < 2) {
